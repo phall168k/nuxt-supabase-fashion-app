@@ -130,7 +130,6 @@
               :auto-upload="false"
               :show-file-list="false"
               :on-change="handleThumbnailChange"
-              class="h-[250px]"
             >
               <el-button>{{ t('banner.choose_image') }}</el-button>
             </el-upload>
