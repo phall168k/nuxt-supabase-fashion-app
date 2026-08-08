@@ -263,6 +263,11 @@ const menuItems: MenuItem[] = [
     icon: 'solar:cart-large-2-outline',
     children: [
       {
+        index: '/admin/sales/sale/',
+        label: 'sale.title',
+        icon: 'solar:bill-list-outline',
+      },
+      {
         index: '/admin/sales/payment-method/',
         label: 'payment_method.title',
         icon: 'solar:card-2-outline',
