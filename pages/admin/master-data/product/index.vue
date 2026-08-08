@@ -59,6 +59,11 @@
             {{ formatPrice(row.unitPrice) }}
           </template>
         </el-table-column>
+        <el-table-column :label="t('columns.discount')" width="120" align="right">
+          <template #default="{ row }">
+            {{ formatDiscount(row.discount) }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('columns.created_at')" min-width="180">
           <template #default="{ row }">
             {{ displayCreatedAt(row.createdAt) }}
@@ -161,6 +166,17 @@
             class="!w-full"
           />
         </el-form-item>
+        <el-form-item :label="t('columns.discount')" prop="discount">
+          <el-input-number
+            v-model="form.discount"
+            :min="0"
+            :max="form.unitPrice"
+            :precision="2"
+            :step="1"
+            controls-position="right"
+            class="!w-full"
+          />
+        </el-form-item>
         <el-form-item :label="t('columns.thumbnail')">
           <div class="w-full space-y-3">
             <div v-if="imagePreviews.length" class="flex flex-wrap gap-3">
@@ -234,6 +250,7 @@ interface Product {
   nameEn: string
   nameKh: string
   unitPrice: number
+  discount: number
   createdByUserId: string | null
   images: ProductImage[]
   thumbnailPaths: string[]
@@ -249,6 +266,7 @@ interface ProductRow {
   name_en: string
   name_kh: string
   unit_price: number | string
+  discount: number | string
   created_by_user_id: string | null
   images: Array<{
     id: number
@@ -271,7 +289,7 @@ interface ProductImage {
 const bucketName = 'fashion-images'
 const pageSizes = [10, 20, 50, 100]
 const maxImageSize = 5 * 1024 * 1024
-const productSelect = 'id, category_id, code, name_en, name_kh, unit_price, created_by_user_id, created_at, category:categories(id, name_en, name_kh), images:product_images(id, image_path, is_active, sort_order)'
+const productSelect = 'id, category_id, code, name_en, name_kh, unit_price, discount, created_by_user_id, created_at, category:categories(id, name_en, name_kh), images:product_images(id, image_path, is_active, sort_order)'
 
 const { t, locale } = useI18n()
 const breadcrumbStore = useBreadcrumbStore()
@@ -335,6 +353,7 @@ const emptyForm = () => ({
   nameEn: '',
   nameKh: '',
   unitPrice: 0,
+  discount: 0,
 })
 const form = reactive(emptyForm())
 
@@ -343,6 +362,19 @@ const rules = computed<FormRules>(() => ({
   nameEn: [{ required: true, message: t('product.name_en_required'), trigger: 'blur' }],
   nameKh: [{ required: true, message: t('product.name_kh_required'), trigger: 'blur' }],
   unitPrice: [{ required: true, message: t('product.unit_price_required'), trigger: 'change' }],
+  discount: [
+    { required: true, message: t('product.discount_required'), trigger: 'change' },
+    {
+      validator: (_rule, value, callback) => {
+        if (Number(value) > Number(form.unitPrice)) {
+          callback(new Error(t('product.discount_over_price')))
+          return
+        }
+        callback()
+      },
+      trigger: 'change',
+    },
+  ],
 }))
 
 watchEffect(() => {
@@ -380,6 +412,7 @@ const mapProduct = (row: ProductRow): Product => {
     nameEn: row.name_en,
     nameKh: row.name_kh,
     unitPrice: Number(row.unit_price),
+    discount: Number(row.discount),
     createdByUserId: row.created_by_user_id,
     images,
     thumbnailPaths: images.map(image => image.path),
@@ -405,6 +438,8 @@ const formatPrice = (price: number) => new Intl.NumberFormat(locale.value, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 }).format(price)
+
+const formatDiscount = (discount: number) => formatPrice(discount)
 
 const displayCreatedAt = (value: string | null) => {
   if (!value) return '—'
@@ -475,6 +510,7 @@ const resetForm = (item?: Product) => {
     nameEn: item.nameEn,
     nameKh: item.nameKh,
     unitPrice: item.unitPrice,
+    discount: item.discount,
   } : emptyForm())
   imagePreviews.value = (item?.images ?? []).map(image => ({
     key: String(image.id),
@@ -593,6 +629,7 @@ const submit = async () => {
       name_en: form.nameEn.trim(),
       name_kh: form.nameKh.trim(),
       unit_price: form.unitPrice,
+      discount: form.discount,
       updated_at: new Date().toISOString(),
     }
 
