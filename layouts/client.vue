@@ -1,9 +1,9 @@
 <template>
-  <section>
-    <nav class="relative z-40 h-[80px] w-full border-b bg-white flex items-center justify-center flex-col">
+  <section class="min-h-screen pt-[80px]">
+    <nav class="fixed inset-x-0 top-0 z-50 flex h-[80px] w-full flex-col items-center justify-center border-b bg-white/95 shadow-sm backdrop-blur">
       <nav class="h-[50px] w-[90%] flex items-center justify-center pt-2">
         <div class="w-[30%]">
-          <NuxtLink class="text-[20px] font-bold text-" to="/">{{ $t('app.title') }}</NuxtLink>
+          <NuxtLink class="text-[20px] font-bold text-slate-900" to="/">{{ $t('app.title') }}</NuxtLink>
         </div>
         <div class="w-[40%] flex items-center justify-center">
           <!-- <el-image class="h-5" src="https://myten11.com/images/logos/logo1.png" fit="cover"/> -->
@@ -15,7 +15,13 @@
             class="cursor-pointer"
             :name="locale === 'km' ? 'emojione:flag-for-cambodia' : 'emojione:flag-for-united-kingdom'"
           />
-          <el-input placeholder="Search" clearable>
+          <el-input
+            v-model="searchKeyword"
+            :placeholder="t('search.placeholder')"
+            clearable
+            @keydown.enter="submitSearch"
+            @clear="submitSearch"
+          >
             <template #prefix>
               <Icon name="iconamoon:search-bold"/>
             </template>
@@ -111,7 +117,10 @@
     children: Category[]
   }
 
-  const { locale, setLocale } = useI18n()
+  const { t, locale, setLocale } = useI18n()
+  const route = useRoute()
+  const router = useRouter()
+  const searchKeyword = ref(typeof route.query.q === 'string' ? route.query.q : '')
   const handleChangeLocalizaiton = (e: any) => {
     setLocale(e);
   }
@@ -119,6 +128,16 @@
   const activeCategoryId = ref<number | null>(null)
   const defaultCategoryIcon = 'solar:tag-outline'
   const supabase = useSupabaseClient()
+
+  watch(() => route.query.q, value => {
+    searchKeyword.value = typeof value === 'string' ? value : ''
+  })
+
+  const submitSearch = () => {
+    const keyword = searchKeyword.value.trim()
+    closeDropdown()
+    router.push({ path: '/search', query: keyword ? { q: keyword } : {} })
+  }
 
   const { data: categoryRows } = await useAsyncData('client-categories', async () => {
     const { data, error } = await supabase

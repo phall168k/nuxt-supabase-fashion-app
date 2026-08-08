@@ -260,7 +260,36 @@
     },
     "home": {
         "shop_now": "ទិញឥឡូវនេះ",
-        "no_banners": "មិនមានផ្ទាំងបែនន័រសកម្ម"
+        "no_banners": "មិនមានផ្ទាំងបែនន័រសកម្ម",
+        "products": "ផលិតផល",
+        "products_description": "ស្វែងរកផលិតផលថ្មីៗរបស់យើង",
+        "no_products": "មិនមានផលិតផលទេ",
+        "all_products_loaded": "បានបង្ហាញផលិតផលទាំងអស់"
+    },
+    "detail": {
+        "home": "ទំព័រដើម",
+        "code": "កូដ",
+        "select_image": "ជ្រើសរើសរូបភាពទី {number}",
+        "you_save": "អ្នកសន្សំបាន {amount}",
+        "availability": "ភាពអាចរកបាន",
+        "stock_on_hand": "ស្តុកដែលមានបច្ចុប្បន្ន",
+        "in_stock": "មានក្នុងស្តុក {count}",
+        "out_of_stock": "អស់ពីស្តុក",
+        "category": "ប្រភេទ",
+        "product_code": "កូដផលិតផល",
+        "related_products": "ផលិតផលដែលពាក់ព័ន្ធ",
+        "top_selling_products": "ផលិតផលលក់ដាច់បំផុត ១០",
+        "top_selling_description": "ផលិតផលមានក្នុងស្តុកដែលអតិថិជនទិញច្រើនបំផុត",
+        "units_sold": "បានលក់ {count} ឯកតា"
+    },
+    "search": {
+        "title": "ស្វែងរកផលិតផល",
+        "placeholder": "ស្វែងរកផលិតផល",
+        "results_for": "លទ្ធផលសម្រាប់ “{keyword}”",
+        "all_products": "មើលផលិតផលដែលមានទាំងអស់",
+        "no_results": "មិនមានផលិតផលដែលត្រូវនឹងការស្វែងរកទេ",
+        "load_failed": "មិនអាចទាញយកលទ្ធផលស្វែងរកបានទេ",
+        "try_again": "ព្យាយាមម្តងទៀត"
     },
     "create": "បង្កើត",
     "edit": "កែប្រែ",

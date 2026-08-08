@@ -260,7 +260,36 @@
     },
     "home": {
         "shop_now": "Shop now",
-        "no_banners": "No active banners"
+        "no_banners": "No active banners",
+        "products": "Products",
+        "products_description": "Explore our latest products",
+        "no_products": "No products available",
+        "all_products_loaded": "You have reached the end"
+    },
+    "detail": {
+        "home": "Home",
+        "code": "Code",
+        "select_image": "Select image {number}",
+        "you_save": "You save {amount}",
+        "availability": "Availability",
+        "stock_on_hand": "Current stock on hand",
+        "in_stock": "{count} in stock",
+        "out_of_stock": "Out of stock",
+        "category": "Category",
+        "product_code": "Product code",
+        "related_products": "Related products",
+        "top_selling_products": "Top 10 selling products",
+        "top_selling_description": "Our most purchased in-stock products",
+        "units_sold": "{count} units sold"
+    },
+    "search": {
+        "title": "Search products",
+        "placeholder": "Search products",
+        "results_for": "Results for “{keyword}”",
+        "all_products": "Browse all available products",
+        "no_results": "No available products matched your search",
+        "load_failed": "Unable to load search results",
+        "try_again": "Try again"
     },
     "create": "Create",
     "edit": "Edit",
