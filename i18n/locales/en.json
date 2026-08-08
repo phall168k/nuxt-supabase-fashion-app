@@ -43,8 +43,14 @@
         "delete_failed": "Unable to delete category",
         "created": "Category created successfully",
         "updated": "Category updated successfully",
-        "deleted": "Category deleted successfully"
-    },
+    "deleted": "Category deleted successfully"
+    ,"products_title": "Products by category"
+    ,"products_description": "Explore available products in {category}"
+    ,"select_category": "Select a category to browse products"
+    ,"not_found": "Category not found"
+    ,"no_products": "No available products in this category"
+    ,"products_load_failed": "Unable to load category products"
+  },
     "columns": {
         "code": "Code",
         "title": "Title",

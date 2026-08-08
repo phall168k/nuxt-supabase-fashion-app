@@ -168,8 +168,8 @@
   };
 
   const categoryPath = (category: Category) => ({
-    path: '/products',
-    query: { category: category.code },
+    path: '/category',
+    query: { 'category-code': category.code },
   });
 
   const openDropdown = (categoryId: number) => {
