@@ -178,13 +178,17 @@ interface StockRow {
     code: string | null
     name_en: string
     name_kh: string
-    thumbnail_path: string | null
+    images: Array<{
+      image_path: string
+      is_active: boolean
+      sort_order: number
+    }>
   }
 }
 
 const bucketName = 'fashion-images'
 const pageSizes = [10, 20, 50, 100]
-const stockSelect = 'id, product_id, min_stock, stock_in, stock_out, stock_adjustment, product:products!inner(id, code, name_en, name_kh, thumbnail_path)'
+const stockSelect = 'id, product_id, min_stock, stock_in, stock_out, stock_adjustment, product:products!inner(id, code, name_en, name_kh, images:product_images(image_path, is_active, sort_order))'
 
 const { t, locale } = useI18n()
 const breadcrumbStore = useBreadcrumbStore()
@@ -229,6 +233,9 @@ const mapStock = (row: StockRow): StockItem => {
   const stockIn = Number(row.stock_in)
   const stockOut = Number(row.stock_out)
   const stockAdjustment = Number(row.stock_adjustment)
+  const thumbnail = [...(row.product.images ?? [])]
+    .sort((a, b) => Number(b.is_active) - Number(a.is_active) || a.sort_order - b.sort_order)[0]
+
   return {
     id: row.id,
     productId: row.product_id,
@@ -242,8 +249,8 @@ const mapStock = (row: StockRow): StockItem => {
       code: row.product.code,
       nameEn: row.product.name_en,
       nameKh: row.product.name_kh,
-      thumbnailPath: row.product.thumbnail_path,
-      thumbnailUrl: imageUrl(row.product.thumbnail_path),
+      thumbnailPath: thumbnail?.image_path ?? null,
+      thumbnailUrl: imageUrl(thumbnail?.image_path ?? null),
     },
   }
 }

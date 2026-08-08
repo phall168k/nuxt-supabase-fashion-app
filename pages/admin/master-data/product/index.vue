@@ -31,14 +31,18 @@
         <template #empty>{{ t('no_data') }}</template>
         <el-table-column :label="t('columns.thumbnail')" width="100" align="center">
           <template #default="{ row }">
+            <div v-if="row.thumbnailUrls.length" class="relative inline-flex">
             <el-image
-              v-if="row.thumbnailUrl"
-              :src="row.thumbnailUrl"
-              :preview-src-list="[row.thumbnailUrl]"
+              :src="row.thumbnailUrls[0]"
+              :preview-src-list="row.thumbnailUrls"
               preview-teleported
               fit="cover"
               class="h-12 w-12 rounded border border-slate-200"
             />
+              <span v-if="row.thumbnailUrls.length > 1" class="absolute -right-2 -top-2 rounded-full bg-slate-700 px-1.5 text-[10px] text-white">
+                +{{ row.thumbnailUrls.length - 1 }}
+              </span>
+            </div>
             <span v-else class="text-slate-400">—</span>
           </template>
         </el-table-column>
@@ -158,28 +162,36 @@
           />
         </el-form-item>
         <el-form-item :label="t('columns.thumbnail')">
-          <div class="flex w-full items-center gap-4">
-            <el-image
-              v-if="thumbnailPreview"
-              :src="thumbnailPreview"
-              fit="cover"
-              class="h-24 w-24 shrink-0 rounded-md border border-slate-200"
-            />
-            <div v-else class="flex h-24 w-24 shrink-0 items-center justify-center rounded-md border border-dashed border-slate-300 text-slate-400">
-              <Icon name="solar:gallery-add-outline" size="28" />
+          <div class="w-full space-y-3">
+            <div v-if="imagePreviews.length" class="flex flex-wrap gap-3">
+              <div v-for="preview in imagePreviews" :key="preview.key" class="relative">
+                <el-image :src="preview.url" fit="cover" class="h-24 w-24 rounded-md border border-slate-200" />
+                <div class="mt-1 flex justify-center">
+                  <el-radio v-model="activeImageKey" :value="preview.key" size="small">
+                    {{ t('product.use_as_thumbnail') }}
+                  </el-radio>
+                </div>
+                <el-button
+                  type="danger"
+                  circle
+                  size="small"
+                  class="!absolute -right-2 -top-2"
+                  @click="removeThumbnail(preview)"
+                >
+                  <Icon name="solar:close-circle-outline" size="15" />
+                </el-button>
+              </div>
             </div>
             <div class="space-y-2">
               <el-upload
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 :auto-upload="false"
                 :show-file-list="false"
+                multiple
                 :on-change="handleThumbnailChange"
               >
-                <el-button>{{ t('product.choose_image') }}</el-button>
+                <el-button>{{ t('product.choose_images') }}</el-button>
               </el-upload>
-              <el-button v-if="thumbnailPreview" type="danger" text @click="removeThumbnail">
-                {{ t('product.remove_image') }}
-              </el-button>
               <p class="text-xs text-slate-500">{{ t('product.image_help') }}</p>
             </div>
           </div>
@@ -223,8 +235,9 @@ interface Product {
   nameKh: string
   unitPrice: number
   createdByUserId: string | null
-  thumbnailPath: string | null
-  thumbnailUrl: string | null
+  images: ProductImage[]
+  thumbnailPaths: string[]
+  thumbnailUrls: string[]
   createdAt: string | null
   category: CategoryOption | null
 }
@@ -237,15 +250,28 @@ interface ProductRow {
   name_kh: string
   unit_price: number | string
   created_by_user_id: string | null
-  thumbnail_path: string | null
+  images: Array<{
+    id: number
+    image_path: string
+    is_active: boolean
+    sort_order: number
+  }>
   created_at: string | null
   category: { id: number; name_en: string; name_kh: string } | null
+}
+
+interface ProductImage {
+  id: number
+  path: string
+  isActive: boolean
+  sortOrder: number
+  url: string
 }
 
 const bucketName = 'fashion-images'
 const pageSizes = [10, 20, 50, 100]
 const maxImageSize = 5 * 1024 * 1024
-const productSelect = 'id, category_id, code, name_en, name_kh, unit_price, created_by_user_id, thumbnail_path, created_at, category:categories(id, name_en, name_kh)'
+const productSelect = 'id, category_id, code, name_en, name_kh, unit_price, created_by_user_id, created_at, category:categories(id, name_en, name_kh), images:product_images(id, image_path, is_active, sort_order)'
 
 const { t, locale } = useI18n()
 const breadcrumbStore = useBreadcrumbStore()
@@ -293,9 +319,15 @@ const params = reactive({ search: '', page: 1, limit: 10 })
 const formRef = ref<FormInstance>()
 const dialogVisible = ref(false)
 const editingItem = ref<Product | null>(null)
-const thumbnailFile = ref<File | null>(null)
-const thumbnailPreview = ref<string | null>(null)
-const removeExistingThumbnail = ref(false)
+interface ImagePreview {
+  key: string
+  url: string
+  id?: number
+  path?: string
+  file?: File
+}
+const imagePreviews = ref<ImagePreview[]>([])
+const activeImageKey = ref<string | null>(null)
 
 const emptyForm = () => ({
   categoryId: null as number | null,
@@ -330,26 +362,39 @@ const getPublicUrl = (path: string | null) => {
   return supabase.storage.from(bucketName).getPublicUrl(path).data.publicUrl
 }
 
-const mapProduct = (row: ProductRow): Product => ({
-  id: row.id,
-  categoryId: row.category_id,
-  code: row.code,
-  nameEn: row.name_en,
-  nameKh: row.name_kh,
-  unitPrice: Number(row.unit_price),
-  createdByUserId: row.created_by_user_id,
-  thumbnailPath: row.thumbnail_path,
-  thumbnailUrl: getPublicUrl(row.thumbnail_path),
-  createdAt: row.created_at,
-  category: row.category
-    ? {
-        id: row.category.id,
-        nameEn: row.category.name_en,
-        nameKh: row.category.name_kh,
-        parentId: null,
-      }
-    : null,
-})
+const mapProduct = (row: ProductRow): Product => {
+  const images = (row.images ?? [])
+    .map(image => ({
+      id: image.id,
+      path: image.image_path,
+      isActive: image.is_active,
+      sortOrder: image.sort_order,
+      url: getPublicUrl(image.image_path) as string,
+    }))
+    .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.sortOrder - b.sortOrder)
+
+  return {
+    id: row.id,
+    categoryId: row.category_id,
+    code: row.code,
+    nameEn: row.name_en,
+    nameKh: row.name_kh,
+    unitPrice: Number(row.unit_price),
+    createdByUserId: row.created_by_user_id,
+    images,
+    thumbnailPaths: images.map(image => image.path),
+    thumbnailUrls: images.map(image => image.url),
+    createdAt: row.created_at,
+    category: row.category
+      ? {
+          id: row.category.id,
+          nameEn: row.category.name_en,
+          nameKh: row.category.name_kh,
+          parentId: null,
+        }
+      : null,
+  }
+}
 
 const categoryLabel = (category: CategoryOption | null) => {
   if (!category) return '—'
@@ -431,9 +476,15 @@ const resetForm = (item?: Product) => {
     nameKh: item.nameKh,
     unitPrice: item.unitPrice,
   } : emptyForm())
-  thumbnailFile.value = null
-  thumbnailPreview.value = item?.thumbnailUrl ?? null
-  removeExistingThumbnail.value = false
+  imagePreviews.value = (item?.images ?? []).map(image => ({
+    key: String(image.id),
+    id: image.id,
+    path: image.path,
+    url: image.url,
+  }))
+  activeImageKey.value = item?.images.find(image => image.isActive)
+    ? String(item.images.find(image => image.isActive)?.id)
+    : imagePreviews.value[0]?.key ?? null
   nextTick(() => formRef.value?.clearValidate())
 }
 
@@ -481,17 +532,22 @@ const handleThumbnailChange = (uploadFile: UploadFile) => {
     useNotification(t('product.image_too_large'), 'error')
     return
   }
-  if (thumbnailPreview.value?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview.value)
-  thumbnailFile.value = file
-  thumbnailPreview.value = URL.createObjectURL(file)
-  removeExistingThumbnail.value = false
+  if (imagePreviews.value.some(preview => preview.file === file)) return
+  const key = crypto.randomUUID()
+  imagePreviews.value.push({
+    key,
+    file,
+    url: URL.createObjectURL(file),
+  })
+  if (!activeImageKey.value) activeImageKey.value = key
 }
 
-const removeThumbnail = () => {
-  if (thumbnailPreview.value?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview.value)
-  thumbnailFile.value = null
-  thumbnailPreview.value = null
-  removeExistingThumbnail.value = true
+const removeThumbnail = (preview: ImagePreview) => {
+  if (preview.url.startsWith('blob:')) URL.revokeObjectURL(preview.url)
+  imagePreviews.value = imagePreviews.value.filter(item => item.key !== preview.key)
+  if (activeImageKey.value === preview.key) {
+    activeImageKey.value = imagePreviews.value[0]?.key ?? null
+  }
 }
 
 const uploadThumbnail = async (file: File) => {
@@ -508,9 +564,9 @@ const uploadThumbnail = async (file: File) => {
 
 const generateProductCode = (id: number) => `PRD${String(id).padStart(7, '0')}`
 
-const removeStoredThumbnail = async (path: string | null) => {
-  if (!path) return
-  const { error } = await supabase.storage.from(bucketName).remove([path])
+const removeStoredThumbnails = async (paths: string[]) => {
+  if (!paths.length) return
+  const { error } = await supabase.storage.from(bucketName).remove(paths)
   if (error) throw error
 }
 
@@ -518,32 +574,36 @@ const submit = async () => {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid || form.categoryId === null) return
 
-  let uploadedPath: string | null = null
+  let uploadedPaths: string[] = []
   let createdProductId: number | null = null
-  const oldPath = editingItem.value?.thumbnailPath ?? null
+  const oldPaths = editingItem.value?.thumbnailPaths ?? []
 
   try {
     submitting.value = true
-    if (thumbnailFile.value) uploadedPath = await uploadThumbnail(thumbnailFile.value)
-
-    const thumbnailPath = uploadedPath
-      ?? (removeExistingThumbnail.value ? null : oldPath)
+    const uploadedByKey = new Map<string, string>()
+    for (const preview of imagePreviews.value) {
+      if (!preview.file) continue
+      const path = await uploadThumbnail(preview.file)
+      uploadedPaths.push(path)
+      uploadedByKey.set(preview.key, path)
+    }
     const values = {
       category_id: form.categoryId,
       code: form.code,
       name_en: form.nameEn.trim(),
       name_kh: form.nameKh.trim(),
       unit_price: form.unitPrice,
-      thumbnail_path: thumbnailPath,
       updated_at: new Date().toISOString(),
     }
 
+    let productId: number
     if (editingItem.value) {
       const { error } = await supabase
         .from('products')
         .update(values)
         .eq('id', editingItem.value.id)
       if (error) throw error
+      productId = editingItem.value.id
     } else {
       const { data, error } = await supabase
         .from('products')
@@ -556,6 +616,7 @@ const submit = async () => {
       if (error) throw error
 
       createdProductId = data.id as number
+      productId = createdProductId
       const { error: codeError } = await supabase
         .from('products')
         .update({ code: generateProductCode(createdProductId) })
@@ -563,8 +624,58 @@ const submit = async () => {
       if (codeError) throw codeError
     }
 
-    if (oldPath && oldPath !== thumbnailPath) {
-      await removeStoredThumbnail(oldPath).catch(() => {
+    const retainedIds = imagePreviews.value
+      .map(preview => preview.id)
+      .filter((id): id is number => Boolean(id))
+    const removedImages = (editingItem.value?.images ?? [])
+      .filter(image => !retainedIds.includes(image.id))
+
+    // Clear the previous thumbnail first to satisfy the one-active-image constraint.
+    const { error: clearActiveError } = await supabase
+      .from('product_images')
+      .update({ is_active: false })
+      .eq('product_id', productId)
+    if (clearActiveError) throw clearActiveError
+
+    if (removedImages.length) {
+      const { error: removeRowsError } = await supabase
+        .from('product_images')
+        .delete()
+        .in('id', removedImages.map(image => image.id))
+      if (removeRowsError) throw removeRowsError
+    }
+
+    const newImageRows = imagePreviews.value.flatMap((preview, index) => {
+      const path = uploadedByKey.get(preview.key)
+      if (!path) return []
+      return [{
+        product_id: productId,
+        image_path: path,
+        is_active: activeImageKey.value === preview.key,
+        sort_order: index,
+      }]
+    })
+    if (newImageRows.length) {
+      const { error: insertImagesError } = await supabase
+        .from('product_images')
+        .insert(newImageRows)
+      if (insertImagesError) throw insertImagesError
+    }
+
+    const activeExistingImage = imagePreviews.value.find(
+      preview => preview.id && preview.key === activeImageKey.value,
+    )
+    if (activeExistingImage?.id) {
+      const { error: activateError } = await supabase
+        .from('product_images')
+        .update({ is_active: true })
+        .eq('id', activeExistingImage.id)
+      if (activateError) throw activateError
+    }
+
+    const removedPaths = removedImages.map(image => image.path)
+    if (removedPaths.length) {
+      await removeStoredThumbnails(removedPaths).catch(() => {
         useNotification(t('product.old_image_cleanup_failed'), 'warning')
       })
     }
@@ -576,7 +687,7 @@ const submit = async () => {
     if (createdProductId) {
       await supabase.from('products').delete().eq('id', createdProductId)
     }
-    if (uploadedPath) await removeStoredThumbnail(uploadedPath).catch(() => undefined)
+    if (uploadedPaths.length) await removeStoredThumbnails(uploadedPaths).catch(() => undefined)
     useNotification(getErrorMessage(error, t('product.save_failed')), 'error')
   } finally {
     submitting.value = false
@@ -592,8 +703,8 @@ const deleteItem = async (item: Product) => {
     )
     const { error } = await supabase.from('products').delete().eq('id', item.id)
     if (error) throw error
-    if (item.thumbnailPath) {
-      await removeStoredThumbnail(item.thumbnailPath).catch(() => {
+    if (item.thumbnailPaths.length) {
+      await removeStoredThumbnails(item.thumbnailPaths).catch(() => {
         useNotification(t('product.old_image_cleanup_failed'), 'warning')
       })
     }
@@ -612,6 +723,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (thumbnailPreview.value?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview.value)
+  imagePreviews.value.forEach((preview) => {
+    if (preview.url.startsWith('blob:')) URL.revokeObjectURL(preview.url)
+  })
 })
 </script>
