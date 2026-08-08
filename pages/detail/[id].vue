@@ -1,5 +1,11 @@
 <template>
   <main class="mx-auto w-[90%] py-6 sm:py-10">
+    <div v-if="productStatus === 'idle' || productPending" class="flex min-h-[60vh] flex-col items-center justify-center gap-3">
+      <Icon name="svg-spinners:ring-resize" size="36" class="text-slate-500" />
+      <p class="text-sm text-slate-500">{{ t('detail.loading') }}</p>
+    </div>
+
+    <template v-else>
     <nav class="mb-6 flex items-center gap-2 text-sm text-slate-500" aria-label="Breadcrumb">
       <NuxtLink to="/" class="hover:text-slate-900">{{ t('detail.home') }}</NuxtLink>
       <Icon name="lucide:chevron-right" size="15" />
@@ -188,6 +194,7 @@
         </NuxtLink>
       </div>
     </section>
+    </template>
   </main>
 </template>
 
@@ -237,7 +244,12 @@ if (!Number.isInteger(productId) || productId <= 0) {
   throw createError({ statusCode: 404, statusMessage: 'Product not found' })
 }
 
-const { data: row } = await useAsyncData(`product-detail-${productId}`, async () => {
+const {
+  data: row,
+  pending: productPending,
+  status: productStatus,
+  error: productError,
+} = await useLazyAsyncData(`product-detail-${productId}`, async () => {
   const { data, error } = await supabase
     .from('products')
     .select('id, code, name_en, name_kh, unit_price, discount, category:categories(id, name_en, name_kh), stock:stocks(stock_in, stock_out, stock_adjustment), images:product_images(id, image_path, is_active, sort_order)')
@@ -247,8 +259,6 @@ const { data: row } = await useAsyncData(`product-detail-${productId}`, async ()
   if (error) throw error
   return data as unknown as ProductRow | null
 })
-
-if (!row.value) throw createError({ statusCode: 404, statusMessage: 'Product not found' })
 
 const { data: relatedRows } = await useAsyncData(`related-products-${productId}`, async () => {
   if (!row.value?.category?.id) return []
@@ -262,7 +272,7 @@ const { data: relatedRows } = await useAsyncData(`related-products-${productId}`
 
   if (error) throw error
   return (data ?? []) as unknown as RelatedProductRow[]
-}, { default: () => [] })
+}, { default: () => [], lazy: true, watch: [row] })
 
 const { data: topSellingRows } = await useAsyncData(`top-selling-products-${productId}`, async () => {
   const { data: ranking, error: rankingError } = await supabase.rpc('get_top_selling_products', { p_limit: 10 })
@@ -281,10 +291,22 @@ const { data: topSellingRows } = await useAsyncData(`top-selling-products-${prod
     const item = productsById.get(Number(rank.product_id))
     return item ? [{ ...item, total_sold: Number(rank.total_sold) }] : []
   })
-}, { default: () => [] })
+}, { default: () => [], lazy: true })
 
 const product = computed(() => {
-  const value = row.value!
+  const value = row.value
+  if (!value) return {
+    id: 0,
+    code: '',
+    nameEn: '',
+    nameKh: '',
+    categoryName: '',
+    unitPrice: 0,
+    discount: 0,
+    salePrice: 0,
+    stockOnHand: 0,
+    images: [] as Array<{ id: number; url: string }>,
+  }
   const images = [...(value.images ?? [])]
     .sort((a, b) => Number(b.is_active) - Number(a.is_active) || a.sort_order - b.sort_order)
     .map(image => ({
@@ -348,6 +370,18 @@ const selectedImage = computed(() => product.value.images[selectedImageIndex.val
 const formatPrice = (value: number) => new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', minimumFractionDigits: 2,
 }).format(value)
+
+watch(productStatus, status => {
+  if (status === 'success' && !row.value) {
+    showError({ statusCode: 404, statusMessage: 'Product not found' })
+  }
+  if (status === 'error') {
+    showError({
+      statusCode: 500,
+      statusMessage: productError.value?.message || 'Unable to load product',
+    })
+  }
+}, { immediate: true })
 
 useHead(() => ({ title: `${productName.value} | Fashion Shop` }))
 </script>

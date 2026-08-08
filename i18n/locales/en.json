@@ -273,8 +273,9 @@
         "no_products": "No products available",
         "all_products_loaded": "You have reached the end"
     },
-    "detail": {
-        "home": "Home",
+  "detail": {
+    "loading": "Loading product...",
+    "home": "Home",
         "code": "Code",
         "select_image": "Select image {number}",
         "you_save": "You save {amount}",
