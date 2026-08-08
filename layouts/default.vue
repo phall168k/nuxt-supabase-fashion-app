@@ -258,6 +258,18 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    index: 'website-content',
+    label: 'website_content',
+    icon: 'solar:global-outline',
+    children: [
+      {
+        index: '/admin/website-content/banner/',
+        label: 'banner.title',
+        icon: 'solar:gallery-wide-outline',
+      },
+    ],
+  },
+  {
     index: 'system',
     label: 'system',
     icon: 'solar:settings-outline',
