@@ -1,0 +1,64 @@
+{
+    "app": {
+        "title": "ហាងលក់សម្លៀកបំពាក់",
+        "icon": "fluent-emoji-flat:womans-clothes"
+    },
+    "headers": {
+        "admin_console": "ផ្ទាំងគ្រប់គ្រង",
+        "edit_profile": "កែប្រែព័ត៌មាន",
+        "change_password": "ផ្លាស់ប្ដូរពាក្យសម្ងាត់",
+        "logout": "ចាកចេញ"
+    },
+    "dashboard": {
+        "title": "ផ្ទាំងគ្រប់គ្រង",
+        "rows": "ជួរ"
+    },
+    "menu": {
+        "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+        "master_data": "ទិន្នន័យមេ",
+        "category": "ប្រភេទ",
+        "user": "អ្នកប្រើប្រាស់"
+    },
+    "master_data": "ទិន្នន័យមេ",
+    "category": {
+        "title": "ប្រភេទ",
+        "description": "បង្កើត និងគ្រប់គ្រងប្រភេទផលិតផល។",
+        "search_placeholder": "ស្វែងរកតាមកូដ ឬឈ្មោះ",
+        "select_parent": "ជ្រើសរើសប្រភេទមេ",
+        "create_title": "បង្កើតប្រភេទ",
+        "edit_title": "កែប្រែប្រភេទ",
+        "delete_title": "លុបប្រភេទ",
+        "code_required": "សូមបញ្ចូលកូដប្រភេទ",
+        "name_en_required": "សូមបញ្ចូលឈ្មោះជាភាសាអង់គ្លេស",
+        "name_kh_required": "សូមបញ្ចូលឈ្មោះជាភាសាខ្មែរ",
+        "confirm_delete": "តើអ្នកចង់លុបប្រភេទ {code} មែនទេ?",
+        "load_failed": "មិនអាចទាញយកប្រភេទបានទេ",
+        "load_parents_failed": "មិនអាចទាញយកប្រភេទមេបានទេ",
+        "save_failed": "មិនអាចរក្សាទុកប្រភេទបានទេ",
+        "delete_failed": "មិនអាចលុបប្រភេទបានទេ",
+        "created": "បានបង្កើតប្រភេទដោយជោគជ័យ",
+        "updated": "បានកែប្រែប្រភេទដោយជោគជ័យ",
+        "deleted": "បានលុបប្រភេទដោយជោគជ័យ"
+    },
+    "columns": {
+        "code": "កូដ",
+        "name_en": "ឈ្មោះជាភាសាអង់គ្លេស",
+        "name_kh": "ឈ្មោះជាភាសាខ្មែរ",
+        "parent_category": "ប្រភេទមេ",
+        "created_by": "បង្កើតដោយ",
+        "created_at": "កាលបរិច្ឆេទបង្កើត",
+        "action": "សកម្មភាព"
+    },
+    "create": "បង្កើត",
+    "edit": "កែប្រែ",
+    "delete": "លុប",
+    "save": "រក្សាទុក",
+    "cancel": "បោះបង់",
+    "total": "សរុប",
+    "no_data": "គ្មានទិន្នន័យ",
+    "administrator": "អ្នកគ្រប់គ្រង",
+    "system": "ប្រព័ន្ធ",
+    "user": {
+        "title": "អ្នកប្រើប្រាស់"
+    } 
+}

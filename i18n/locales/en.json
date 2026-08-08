@@ -1,0 +1,64 @@
+{
+    "app": {
+        "title": "Fashion Shop",
+        "icon": "fluent-emoji-flat:womans-clothes"
+    },
+    "headers": {
+        "admin_console": "Admin Console",
+        "edit_profile": "Edit Profile",
+        "change_password": "Change Password",
+        "logout": "Logout"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "rows": "Rows"
+    },
+    "menu": {
+        "dashboard": "Dashboard",
+        "master_data": "Master Data",
+        "category": "Category",
+        "user": "User"
+    },
+    "master_data": "Master Data",
+    "category": {
+        "title": "Categories",
+        "description": "Create and manage product categories.",
+        "search_placeholder": "Search code or name",
+        "select_parent": "Select a parent category",
+        "create_title": "Create category",
+        "edit_title": "Edit category",
+        "delete_title": "Delete category",
+        "code_required": "Category code is required",
+        "name_en_required": "English name is required",
+        "name_kh_required": "Khmer name is required",
+        "confirm_delete": "Delete category {code}?",
+        "load_failed": "Unable to load categories",
+        "load_parents_failed": "Unable to load parent categories",
+        "save_failed": "Unable to save category",
+        "delete_failed": "Unable to delete category",
+        "created": "Category created successfully",
+        "updated": "Category updated successfully",
+        "deleted": "Category deleted successfully"
+    },
+    "columns": {
+        "code": "Code",
+        "name_en": "English name",
+        "name_kh": "Khmer name",
+        "parent_category": "Parent category",
+        "created_by": "Created by",
+        "created_at": "Created at",
+        "action": "Actions"
+    },
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "total": "Total",
+    "no_data": "No data",
+    "administrator": "Administrator",
+    "system": "System",
+    "user": {
+        "title": "User"
+    } 
+}

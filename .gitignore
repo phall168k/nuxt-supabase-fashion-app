@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+
+# Nuxt build and development output
+.nuxt/
+.output/
+.data/
+.nitro/
+.cache/
+dist/
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# Supabase local state (keep config.toml and migrations tracked)
+supabase/.branches/
+supabase/.temp/
+supabase/.env.keys
+supabase/.env.local
+supabase/.env.*.local
+
+# Test output
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deployment tooling
+.vercel/
+.netlify/
+.wrangler/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+.fleet/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local certificates and keys
+*.pem
+*.key
+*.crt
