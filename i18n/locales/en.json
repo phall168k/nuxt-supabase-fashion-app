@@ -258,6 +258,10 @@
         "updated": "Payment method updated successfully",
         "deleted": "Payment method deleted successfully"
     },
+    "home": {
+        "shop_now": "Shop now",
+        "no_banners": "No active banners"
+    },
     "create": "Create",
     "edit": "Edit",
     "delete": "Delete",
