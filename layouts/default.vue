@@ -236,6 +236,18 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    index: 'inventory',
+    label: 'inventory',
+    icon: 'solar:box-minimalistic-outline',
+    children: [
+      {
+        index: '/admin/inventory/stock/',
+        label: 'stock.title',
+        icon: 'solar:clipboard-list-outline',
+      },
+    ],
+  },
+  {
     index: 'system',
     label: 'system',
     icon: 'solar:settings-outline',
