@@ -272,6 +272,11 @@ const menuItems: MenuItem[] = [
         label: 'payment_method.title',
         icon: 'solar:card-2-outline',
       },
+      {
+        index: '/admin/sales/picked-product/',
+        label: 'picked_product.title',
+        icon: 'solar:hand-stars-outline',
+      },
     ],
   },
   {
