@@ -245,6 +245,11 @@ const menuItems: MenuItem[] = [
         label: 'stock.title',
         icon: 'solar:clipboard-list-outline',
       },
+      {
+        index: '/admin/inventory/stock-in/',
+        label: 'stock_in.title',
+        icon: 'solar:inbox-in-outline',
+      },
     ],
   },
   {
