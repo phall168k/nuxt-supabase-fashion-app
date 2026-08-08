@@ -37,6 +37,12 @@
         :indent="28"
       >
         <template #empty>{{ t('no_data') }}</template>
+        <el-table-column :label="t('columns.icon')" width="90" align="center">
+          <template #default="{ row }">
+            <Icon v-if="row.icon" :name="row.icon" size="24" />
+            <span v-else class="text-slate-400">—</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="code" :label="t('columns.code')" min-width="140" />
         <el-table-column prop="nameEn" :label="t('columns.name_en')" min-width="220" />
         <el-table-column prop="nameKh" :label="t('columns.name_kh')" min-width="220" />
@@ -113,6 +119,15 @@
         <el-form-item :label="t('columns.code')" prop="code">
           <el-input v-model="form.code" placeholder="BEV" />
         </el-form-item>
+        <el-form-item :label="t('columns.icon')" prop="icon">
+          <el-input v-model="form.icon" placeholder="solar:t-shirt-outline">
+            <template #prefix>
+              <Icon v-if="form.icon" :name="form.icon" size="18" />
+              <Icon v-else name="solar:gallery-outline" size="18" />
+            </template>
+          </el-input>
+          <p class="mt-1 text-xs text-slate-500">{{ t('category.icon_help') }}</p>
+        </el-form-item>
         <el-form-item :label="t('columns.name_en')" prop="nameEn">
           <el-input v-model="form.nameEn" placeholder="Beverage" />
         </el-form-item>
@@ -167,6 +182,7 @@ useHead({
 interface Category {
   id: number
   code: string
+  icon: string | null
   nameEn: string
   nameKh: string
   parentId: number | null
@@ -182,6 +198,7 @@ interface Category {
 interface CategoryRow {
   id: number
   code: string
+  icon: string | null
   name_en: string
   name_kh: string
   parent_id: number | null
@@ -218,6 +235,7 @@ const editingItem = ref<Category | null>(null)
 
 const emptyForm = () => ({
   code: '',
+  icon: '',
   nameEn: '',
   nameKh: '',
   parentId: null as number | null,
@@ -261,6 +279,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 const mapCategory = (row: CategoryRow): Category => ({
   id: row.id,
   code: row.code,
+  icon: row.icon,
   nameEn: row.name_en,
   nameKh: row.name_kh,
   parentId: row.parent_id,
@@ -295,6 +314,7 @@ const displayCreatedAt = (createdAt: Category['createdAt']) => {
 const resetForm = (value = emptyForm()) => {
   Object.assign(form, {
     code: value.code,
+    icon: value.icon ?? '',
     nameEn: value.nameEn,
     nameKh: value.nameKh,
     parentId: value.parentId,
@@ -308,7 +328,7 @@ const loadParentOptions = async (excludeId?: number) => {
 
     const { data, error } = await supabase
       .from('categories')
-      .select('id, code, name_en, name_kh, parent_id, created_at, created_by_user_id')
+      .select('id, code, icon, name_en, name_kh, parent_id, created_at, created_by_user_id')
       .is('parent_id', null)
       .order('name_en')
 
@@ -334,7 +354,7 @@ const loadItems = async () => {
 
     let query = supabase
       .from('categories')
-      .select('id, code, name_en, name_kh, parent_id, created_at, created_by_user_id', { count: 'exact' })
+      .select('id, code, icon, name_en, name_kh, parent_id, created_at, created_by_user_id', { count: 'exact' })
       .is('parent_id', null)
       .order('created_at', { ascending: false })
       .range(from, to)
@@ -356,7 +376,7 @@ const loadItems = async () => {
     if (parentIds.length) {
       const { data: childData, error: childError } = await supabase
         .from('categories')
-        .select('id, code, name_en, name_kh, parent_id, created_at, created_by_user_id')
+        .select('id, code, icon, name_en, name_kh, parent_id, created_at, created_by_user_id')
         .in('parent_id', parentIds)
         .order('created_at', { ascending: false })
 
@@ -402,7 +422,7 @@ const openEditDialog = async (item: Category) => {
     submitting.value = true
     const { data, error } = await supabase
       .from('categories')
-      .select('id, code, name_en, name_kh, parent_id, created_at, created_by_user_id')
+      .select('id, code, icon, name_en, name_kh, parent_id, created_at, created_by_user_id')
       .eq('id', item.id)
       .single()
 
@@ -425,6 +445,7 @@ const submit = async () => {
     submitting.value = true
     const values = {
       code: form.code.trim(),
+      icon: form.icon.trim() || null,
       name_en: form.nameEn.trim(),
       name_kh: form.nameKh.trim(),
       parent_id: form.parentId,

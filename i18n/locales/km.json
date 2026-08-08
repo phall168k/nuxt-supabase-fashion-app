@@ -26,6 +26,7 @@
         "title": "ប្រភេទ",
         "description": "បង្កើត និងគ្រប់គ្រងប្រភេទផលិតផល។",
         "search_placeholder": "ស្វែងរកតាមកូដ ឬឈ្មោះ",
+        "icon_help": "ឈ្មោះ Iconify ជាជម្រើស ឧទាហរណ៍ solar:t-shirt-outline។",
         "select_parent": "ជ្រើសរើសប្រភេទមេ",
         "create_title": "បង្កើតប្រភេទ",
         "edit_title": "កែប្រែប្រភេទ",
@@ -44,6 +45,7 @@
     },
     "columns": {
         "code": "កូដ",
+        "icon": "រូបតំណាង",
         "name_en": "ឈ្មោះជាភាសាអង់គ្លេស",
         "name_kh": "ឈ្មោះជាភាសាខ្មែរ",
         "parent_category": "ប្រភេទមេ",

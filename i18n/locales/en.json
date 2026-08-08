@@ -26,6 +26,7 @@
         "title": "Categories",
         "description": "Create and manage product categories.",
         "search_placeholder": "Search code or name",
+        "icon_help": "Optional Iconify name, for example solar:t-shirt-outline.",
         "select_parent": "Select a parent category",
         "create_title": "Create category",
         "edit_title": "Edit category",
@@ -44,6 +45,7 @@
     },
     "columns": {
         "code": "Code",
+        "icon": "Icon",
         "name_en": "English name",
         "name_kh": "Khmer name",
         "parent_category": "Parent category",
