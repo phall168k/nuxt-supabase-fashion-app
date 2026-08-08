@@ -228,6 +228,11 @@ const menuItems: MenuItem[] = [
         label: 'category.title', 
         icon: 'solar:folder-with-files-outline',
       },
+      {
+        index: '/admin/master-data/product/',
+        label: 'product.title',
+        icon: 'solar:t-shirt-outline',
+      },
     ],
   },
   {
