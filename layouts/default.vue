@@ -250,6 +250,11 @@ const menuItems: MenuItem[] = [
         label: 'stock_in.title',
         icon: 'solar:inbox-in-outline',
       },
+      {
+        index: '/admin/inventory/stock-adjustment/',
+        label: 'stock_adjustment.title',
+        icon: 'solar:tuning-square-2-outline',
+      },
     ],
   },
   {
