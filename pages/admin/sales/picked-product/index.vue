@@ -168,9 +168,18 @@ const submit = async () => {
   try {
     submitting.value = true
     const values = { product_id: form.productId, quantity: form.quantity, updated_at: new Date().toISOString() }
-    const { error } = editingItem.value
-      ? await supabase.from('picked_products').update(values).eq('id', editingItem.value.id)
-      : await supabase.from('picked_products').insert({ ...values, picked_by_id: user.value?.id })
+    let result
+    if (editingItem.value) {
+      result = await supabase.from('picked_products').update(values).eq('id', editingItem.value.id)
+    } else {
+      // Resolve auth at write time: the reactive user can briefly be null while
+      // the client restores its session, which previously omitted picked_by_id.
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      if (!authData.user) throw new Error(t('picked_product.authentication_required'))
+      result = await supabase.from('picked_products').insert({ ...values, picked_by_id: authData.user.id })
+    }
+    const { error } = result
     if (error) throw error
     useNotification(editingItem.value ? t('picked_product.updated') : t('picked_product.created'))
     dialogVisible.value = false
