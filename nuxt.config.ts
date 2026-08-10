@@ -40,6 +40,8 @@ export default defineNuxtConfig({
     types: false,
   },
   runtimeConfig: {
+    bakongApiToken: process.env.NUXT_BAKONG_API_TOKEN,
+    bakongApiBaseUrl: process.env.NUXT_BAKONG_API_BASE_URL || 'https://api-bakong.nbc.gov.kh',
     public: {
       apiBaseUrl: process.env.API_BASE_URL
     }

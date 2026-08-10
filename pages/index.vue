@@ -67,13 +67,13 @@
         :infinite-scroll-distance="300"
         class="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 xl:grid-cols-5"
       >
-        <NuxtLink
+        <article
           v-for="product in products"
           :key="product.id"
-          :to="productItemPath(product)"
-          class="group min-w-0"
+          class="group relative min-w-0"
         >
-          <div class="aspect-[3/4] overflow-hidden rounded-md bg-slate-100">
+          <NuxtLink :to="productItemPath(product)" class="block">
+          <div class="relative aspect-[3/4] overflow-hidden rounded-md bg-slate-100">
             <el-image
               v-if="product.thumbnailUrl"
               :src="product.thumbnailUrl"
@@ -97,7 +97,11 @@
               <Icon name="solar:gallery-wide-outline" size="36" />
             </div>
           </div>
+          </NuxtLink>
 
+          <ClientAddToCartButton :product-id="product.id" class="absolute right-2 top-2 z-10" />
+
+          <NuxtLink :to="productItemPath(product)" class="block">
           <h3 class="mt-3 truncate text-sm font-medium text-slate-800 transition group-hover:text-black sm:text-base">
             {{ productTitle(product) }}
           </h3>
@@ -112,7 +116,8 @@
               {{ formatPrice(product.unitPrice - product.discount) }}
             </span>
           </div>
-        </NuxtLink>
+          </NuxtLink>
+        </article>
       </div>
 
       <div v-if="productsLoading" class="flex justify-center py-8">
