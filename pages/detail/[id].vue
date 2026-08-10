@@ -389,48 +389,65 @@ const seoDescription = computed(() => productName.value
   ? `${productName.value} — ${formatPrice(product.value.salePrice)}`
   : t('app.title'))
 const canonicalUrl = computed(() => new URL(route.fullPath, requestUrl.origin).toString())
-
+const config = useRuntimeConfig();
+const siteUrl = config.public.nuxtPublicUrl;
+const currentUrl = computed(() => `${siteUrl}${route.path}`)
 useSeoMeta({
-  title: () => seoTitle.value,
-  description: () => seoDescription.value,
-  ogTitle: () => seoTitle.value,
-  ogDescription: () => seoDescription.value,
+  title: seoTitle,
+  description: seoDescription,
+
   ogType: 'website',
-  ogUrl: () => canonicalUrl.value,
-  ogImage: () => seoThumbnail.value || undefined,
-  ogImageAlt: () => productName.value || t('app.title'),
+  ogSiteName: 'Fashion Store | Trendy Clothing, Shoes & Accessories Online',
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogUrl: currentUrl,
+  ogImage: seoThumbnail,
+  ogImageSecureUrl: seoThumbnail,
+  ogImageAlt: seoTitle,
+
   twitterCard: 'summary_large_image',
-  twitterTitle: () => seoTitle.value,
-  twitterDescription: () => seoDescription.value,
-  twitterImage: () => seoThumbnail.value || undefined,
+  twitterTitle: seoTitle,
+  twitterDescription: seoDescription,
+  twitterImage: seoThumbnail,
+  twitterImageAlt: seoTitle,
+
+  robots: 'index, follow',
+  author: 'EOM Phall'
 })
 
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-  meta: [
-    { property: 'product:price:amount', content: seoPrice.value },
-    { property: 'product:price:currency', content: 'USD' },
+useHead({
+  htmlAttrs: {
+    lang: 'en'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: currentUrl
+    }
   ],
-  script: row.value ? [{
-    type: 'application/ld+json',
-    textContent: JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: productName.value,
-      image: seoThumbnail.value ? [seoThumbnail.value] : undefined,
-      sku: product.value.code,
-      offers: {
-        '@type': 'Offer',
-        url: canonicalUrl.value,
-        priceCurrency: 'USD',
-        price: seoPrice.value,
-        availability: product.value.stockOnHand > 0
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
-      },
-    }),
-  }] : [],
-}))
+  meta: [
+    {
+      property: 'fb:app_id',
+      content: '390063447027213'
+    },
+    {
+      property: 'og:image:width',
+      content: '1200'
+    },
+    {
+      property: 'og:image:height',
+      content: '630'
+    },
+    {
+      property: 'og:image:type',
+      content: 'image/jpeg'
+    },
+    {
+      name: 'theme-color',
+      content: '#0f172a'
+    }
+  ]
+})
 
 watch(productStatus, status => {
   if (status === 'success' && !row.value) {
