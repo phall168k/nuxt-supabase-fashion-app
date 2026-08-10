@@ -281,23 +281,24 @@ const loadMoreProducts = async () => {
 await loadMoreProducts()
 
 const canonicalUrl = computed(() => `${requestUrl.origin}${requestUrl.pathname}`)
-const seoTitle = computed(() => t('home.seo_title'))
-const seoDescription = computed(() => t('home.seo_description'))
-const socialImage = computed(() => banners.value[0]?.thumbnailUrl)
+const seoTitle = 'Fashion Store | Trendy Clothing, Shoes & Accessories Online'
+const seoDescription = 'Shop the latest fashion for men and women, including trendy clothing, shoes, bags, accessories, and more. Discover stylish, quality products at great prices and upgrade your everyday look.'
+const socialImage = computed(() => new URL('/logo.png', requestUrl.origin).toString())
 
 useSeoMeta(() => ({
-  title: seoTitle.value,
-  description: seoDescription.value,
-  ogTitle: seoTitle.value,
-  ogDescription: seoDescription.value,
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
   ogSiteName: t('app.title'),
   ogType: 'website',
   ogUrl: canonicalUrl.value,
   ogImage: socialImage.value,
+  ogImageAlt: seoTitle,
   ogLocale: locale.value === 'km' ? 'km_KH' : 'en_US',
   twitterCard: 'summary_large_image',
-  twitterTitle: seoTitle.value,
-  twitterDescription: seoDescription.value,
+  twitterTitle: seoTitle,
+  twitterDescription: seoDescription,
   twitterImage: socialImage.value,
   robots: 'index, follow',
 }))
@@ -311,9 +312,11 @@ useHead(() => ({
     innerHTML: JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'OnlineStore',
-      name: t('app.title'),
+      name: 'Fashion Store',
       url: canonicalUrl.value,
-      description: seoDescription.value,
+      description: seoDescription,
+      logo: socialImage.value,
+      image: socialImage.value,
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
         name: t('home.products'),
