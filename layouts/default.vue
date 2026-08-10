@@ -214,7 +214,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    index: '/',
+    index: '/admin/',
     label: 'dashboard.title',
     icon: 'solar:widget-5-outline',
   },

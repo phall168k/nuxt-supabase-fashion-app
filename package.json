@@ -20,6 +20,7 @@
     "@pinia/nuxt": "^1.0.1",
     "@types/bakong-khqr": "^1.0.1",
     "bakong-khqr": "^1.0.20",
+    "chart.js": "^4.5.1",
     "element-plus": "^2.14.4",
     "nuxt": "^4.5.2",
     "pinia": "^4.0.2",
