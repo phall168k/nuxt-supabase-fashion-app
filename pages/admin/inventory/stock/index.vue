@@ -7,18 +7,30 @@
           <p class="mt-1 text-sm text-slate-500">{{ t('stock.description') }}</p>
         </div>
 
-        <el-input
-          v-model="params.search"
-          clearable
-          :placeholder="t('stock.search_placeholder')"
-          class="sm:!w-[280px]"
-          @keydown.enter="searchItems"
-          @clear="searchItems"
-        >
-          <template #prefix>
-            <Icon name="solar:magnifer-outline" />
-          </template>
-        </el-input>
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <el-cascader
+            v-model="params.categoryId"
+            :options="categoryCascaderOptions"
+            :props="{ checkStrictly: true, emitPath: false }"
+            clearable
+            filterable
+            :placeholder="t('category.title')"
+            class="sm:!w-[220px]"
+            @change="searchItems"
+          />
+          <el-input
+            v-model="params.search"
+            clearable
+            :placeholder="t('stock.search_placeholder')"
+            class="sm:!w-[280px]"
+            @keydown.enter="searchItems"
+            @clear="searchItems"
+          >
+            <template #prefix>
+              <Icon name="solar:magnifer-outline" />
+            </template>
+          </el-input>
+        </div>
       </div>
 
       <el-table v-loading="loading" :data="items" stripe class="w-full" row-key="id">
@@ -147,12 +159,26 @@ definePageMeta({ middleware: 'auth' })
 useHead({ title: 'MINI-POS-STOCK' })
 
 interface StockProduct {
-  id: number
+  id: string
   code: string | null
   nameEn: string
   nameKh: string
   thumbnailPath: string | null
   thumbnailUrl: string | null
+}
+
+interface CategoryOption {
+  id: number
+  code: string
+  nameEn: string
+  nameKh: string
+  parentId: number | null
+}
+
+interface CategoryCascaderOption {
+  value: number
+  label: string
+  children?: CategoryCascaderOption[]
 }
 
 interface StockItem {
@@ -197,8 +223,9 @@ const supabase = useSupabaseClient()
 const loading = ref(false)
 const submitting = ref(false)
 const items = ref<StockItem[]>([])
+const categoryOptions = ref<CategoryOption[]>([])
 const meta = reactive({ totalItems: 0 })
-const params = reactive({ search: '', page: 1, limit: 10 })
+const params = reactive({ search: '', categoryId: null as number | null, page: 1, limit: 10 })
 const dialogVisible = ref(false)
 const editingItem = ref<StockItem | null>(null)
 const formRef = ref<FormInstance>()
@@ -256,15 +283,73 @@ const mapStock = (row: StockRow): StockItem => {
 }
 
 const productName = (product: StockProduct) => locale.value === 'km' ? product.nameKh : product.nameEn
+const categoryName = (category: CategoryOption) => locale.value === 'km' ? category.nameKh : category.nameEn
+const categoryCascaderOptions = computed<CategoryCascaderOption[]>(() => {
+  const nodes = new Map<number, CategoryCascaderOption>()
+  categoryOptions.value.forEach(category => nodes.set(category.id, {
+    value: category.id,
+    label: `${category.code} · ${categoryName(category)}`,
+    children: [],
+  }))
 
-const matchingProductIds = async (search: string) => {
-  if (!search) return null
+  const roots: CategoryCascaderOption[] = []
+  categoryOptions.value.forEach(category => {
+    const node = nodes.get(category.id)!
+    const parent = category.parentId === null ? undefined : nodes.get(category.parentId)
+    if (parent) parent.children!.push(node)
+    else roots.push(node)
+  })
+
+  nodes.forEach(node => {
+    if (!node.children?.length) delete node.children
+  })
+  return roots
+})
+
+const categoryFilterIds = (categoryId: number | null) => {
+  if (categoryId === null) return null
+  const selected = categoryOptions.value.find(category => category.id === categoryId)
+  if (!selected || selected.parentId !== null) return [categoryId]
+
+  const ids = [categoryId]
+  const appendChildren = (parentId: number) => {
+    categoryOptions.value
+      .filter(category => category.parentId === parentId)
+      .forEach(category => {
+        ids.push(category.id)
+        appendChildren(category.id)
+      })
+  }
+  appendChildren(categoryId)
+  return ids
+}
+
+const loadCategories = async () => {
   const { data, error } = await supabase
+    .from('categories')
+    .select('id, code, name_en, name_kh, parent_id')
+    .eq('is_active', true)
+    .order('name_en')
+  if (error) throw error
+  categoryOptions.value = (data ?? []).map(category => ({
+    id: category.id,
+    code: category.code,
+    nameEn: category.name_en,
+    nameKh: category.name_kh,
+    parentId: category.parent_id,
+  }))
+}
+
+const matchingProductIds = async (search: string, categoryIds: number[] | null) => {
+  if (!search && categoryIds === null) return null
+  let query = supabase
     .from('products')
     .select('id')
-    .or(`code.ilike.%${search}%,name_en.ilike.%${search}%,name_kh.ilike.%${search}%`)
+  if (search) query = query.or(`code.ilike.%${search}%,name_en.ilike.%${search}%,name_kh.ilike.%${search}%`)
+  if (categoryIds) query = query.in('category_id', categoryIds)
+  const { data, error } = await query
   if (error) throw error
-  return (data ?? []).map(row => row.id as number)
+  return (data ?? []).map(row => String(row.id))
 }
 
 const loadItems = async () => {
@@ -272,7 +357,8 @@ const loadItems = async () => {
     loading.value = true
     const from = (params.page - 1) * params.limit
     const search = params.search.trim().replace(/[,%()]/g, '')
-    const productIds = await matchingProductIds(search)
+    const selectedCategoryId = typeof params.categoryId === 'number' ? params.categoryId : null
+    const productIds = await matchingProductIds(search, categoryFilterIds(selectedCategoryId))
 
     if (productIds?.length === 0) {
       items.value = []
@@ -348,5 +434,11 @@ const submit = async () => {
   }
 }
 
-onMounted(loadItems)
+onMounted(async () => {
+  try {
+    await Promise.all([loadCategories(), loadItems()])
+  } catch (error) {
+    useNotification(getErrorMessage(error, t('stock.load_failed')), 'error')
+  }
+})
 </script>

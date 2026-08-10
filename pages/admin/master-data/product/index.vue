@@ -8,6 +8,16 @@
         </div>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <el-cascader
+            v-model="params.categoryId"
+            :options="categoryCascaderOptions"
+            :props="categoryCascaderProps"
+            :placeholder="t('product.all_categories')"
+            clearable
+            filterable
+            class="sm:!w-[220px]"
+            @change="searchItems"
+          />
           <el-input
             v-model="params.search"
             clearable
@@ -331,8 +341,25 @@ const categoryCascaderOptions = computed<CategoryCascaderOption[]>(() => {
     .filter(category => category.parentId === null)
     .map(toOption)
 })
+const categoryFilterIds = (categoryId: number | null) => {
+  if (categoryId === null) return null
+  const selected = categoryOptions.value.find(category => category.id === categoryId)
+  if (!selected || selected.parentId !== null) return [categoryId]
+
+  const ids = [categoryId]
+  const appendChildren = (parentId: number) => {
+    categoryOptions.value
+      .filter(category => category.parentId === parentId)
+      .forEach(category => {
+        ids.push(category.id)
+        appendChildren(category.id)
+      })
+  }
+  appendChildren(categoryId)
+  return ids
+}
 const meta = reactive({ totalItems: 0 })
-const params = reactive({ search: '', page: 1, limit: 10 })
+const params = reactive({ search: '', categoryId: null as number | null, page: 1, limit: 10 })
 
 const formRef = ref<FormInstance>()
 const dialogVisible = ref(false)
@@ -482,6 +509,9 @@ const loadItems = async () => {
       .order('created_at', { ascending: false })
       .range(from, from + params.limit - 1)
     if (search) query = query.or(`code.ilike.%${search}%,name_en.ilike.%${search}%,name_kh.ilike.%${search}%`)
+    const selectedCategoryId = typeof params.categoryId === 'number' ? params.categoryId : null
+    const categoryIds = categoryFilterIds(selectedCategoryId)
+    if (categoryIds) query = query.in('category_id', categoryIds)
     const { data, count, error } = await query
     if (error) throw error
     items.value = ((data ?? []) as unknown as ProductRow[]).map(mapProduct)
