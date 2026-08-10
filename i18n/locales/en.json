@@ -9,6 +9,17 @@
         "change_password": "Change Password",
         "logout": "Logout"
     },
+    "footer": {
+        "description": "Discover quality fashion for every day, with simple ordering and secure local payments.",
+        "shop": "Shop",
+        "home": "Home",
+        "all_products": "All products",
+        "account": "Account",
+        "contact": "Contact",
+        "location": "Phnom Penh, Cambodia",
+        "rights": "All rights reserved.",
+        "secure_payment": "Secure payment powered by KHQR"
+    },
     "sign_up": {
         "title": "Create your account",
         "description": "Sign up to enjoy a faster shopping experience.",

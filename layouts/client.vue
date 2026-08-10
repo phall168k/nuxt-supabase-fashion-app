@@ -1,5 +1,5 @@
 <template>
-  <section class="min-h-screen pt-[80px]">
+  <section class="flex min-h-screen flex-col pt-[80px]">
     <nav class="fixed inset-x-0 top-0 z-50 flex h-[80px] w-full flex-col items-center justify-center border-b bg-white/95 shadow-sm backdrop-blur">
       <nav class="h-[50px] w-[90%] flex items-center justify-center pt-2">
         <div class="w-[30%]">
@@ -383,7 +383,65 @@
       </template>
     </el-dialog>
 
-    <slot />
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-12 border-t border-slate-200 bg-slate-950 text-slate-300">
+      <div class="mx-auto grid w-[90%] gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <NuxtLink to="/" class="inline-flex items-center gap-2 text-lg font-bold text-white">
+            <Icon :name="t('app.icon')" size="34" />
+            {{ t('app.title') }}
+          </NuxtLink>
+          <p class="mt-4 max-w-xs text-sm leading-6 text-slate-400">{{ t('footer.description') }}</p>
+          <div class="mt-5 flex items-center gap-2">
+            <button type="button" class="footer-icon-button" aria-label="Facebook"><Icon name="simple-icons:facebook" size="17" /></button>
+            <button type="button" class="footer-icon-button" aria-label="Instagram"><Icon name="simple-icons:instagram" size="17" /></button>
+            <button type="button" class="footer-icon-button" aria-label="Telegram"><Icon name="simple-icons:telegram" size="17" /></button>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.shop') }}</h2>
+          <nav class="mt-4 flex flex-col items-start gap-3 text-sm">
+            <NuxtLink to="/" class="footer-link">{{ t('footer.home') }}</NuxtLink>
+            <NuxtLink to="/search" class="footer-link">{{ t('footer.all_products') }}</NuxtLink>
+            <NuxtLink v-for="category in categories.slice(0, 4)" :key="category.id" :to="categoryPath(category)" class="footer-link">
+              {{ categoryName(category) }}
+            </NuxtLink>
+          </nav>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.account') }}</h2>
+          <nav class="mt-4 flex flex-col items-start gap-3 text-sm">
+            <button v-if="user" type="button" class="footer-link" @click="openProfileDialog">{{ t('headers.edit_profile') }}</button>
+            <button v-if="user" type="button" class="footer-link" @click="handleAccountCommand('purchase-history')">{{ t('purchase_history.menu') }}</button>
+            <NuxtLink v-else to="/auth/login" class="footer-link">{{ t('sign_up.sign_in') }}</NuxtLink>
+            <NuxtLink v-if="!user" to="/auth/sign-up" class="footer-link">{{ t('sign_up.submit') }}</NuxtLink>
+            <NuxtLink v-if="clientProfile?.role === 'admin'" to="/admin" class="footer-link">{{ t('menu.dashboard') }}</NuxtLink>
+          </nav>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.contact') }}</h2>
+          <div class="mt-4 space-y-3 text-sm text-slate-400">
+            <p class="flex items-start gap-2"><Icon name="lucide:map-pin" size="17" class="mt-0.5 shrink-0" />{{ t('footer.location') }}</p>
+            <a href="mailto:support@fashionshop.com" class="footer-link flex items-center gap-2"><Icon name="lucide:mail" size="17" />support@fashionshop.com</a>
+            <button type="button" class="footer-link flex items-center gap-2" @click="handleChangeLocalizaiton(locale === 'en' ? 'km' : 'en')">
+              <Icon name="lucide:languages" size="17" />{{ locale === 'en' ? 'ខ្មែរ' : 'English' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-slate-800">
+        <div class="mx-auto flex w-[90%] flex-col gap-2 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {{ currentYear }} {{ t('app.title') }}. {{ t('footer.rights') }}</p>
+          <p>{{ t('footer.secure_payment') }}</p>
+        </div>
+      </div>
+    </footer>
   </section>
 </template>
 
@@ -438,6 +496,7 @@
     : i18n.t(key)
   const route = useRoute()
   const router = useRouter()
+  const currentYear = new Date().getFullYear()
   const searchKeyword = ref(typeof route.query.q === 'string' ? route.query.q : '')
   const handleChangeLocalizaiton = (e: any) => {
     setLocale(e);
@@ -1177,6 +1236,33 @@
   .category-menu-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+  }
+
+  .footer-link {
+    color: rgb(148 163 184);
+    transition: color 150ms ease;
+  }
+
+  .footer-link:hover {
+    color: #fff;
+  }
+
+  .footer-icon-button {
+    display: inline-flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(51 65 85);
+    border-radius: 9999px;
+    color: rgb(148 163 184);
+    transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+  }
+
+  .footer-icon-button:hover {
+    border-color: rgb(100 116 139);
+    background: rgb(30 41 59);
+    color: #fff;
   }
 
   :global(.purchase-order-dialog) {
