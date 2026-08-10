@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ productId: number }>()
+const props = defineProps<{ productId: string }>()
 
 const { t } = useI18n()
 const supabase = useSupabaseClient()

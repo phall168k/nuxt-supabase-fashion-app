@@ -168,7 +168,7 @@ definePageMeta({ middleware: 'auth' })
 useHead({ title: 'MINI-POS-STOCK-ADJUSTMENT' })
 
 interface ProductOption {
-  id: number
+  id: string
   code: string | null
   nameEn: string
   nameKh: string
@@ -177,7 +177,7 @@ interface ProductOption {
 interface StockAdjustmentLine {
   id?: number
   key: string
-  productId: number | null
+  productId: string | null
   quantity: number
   note: string
   product?: ProductOption
@@ -198,10 +198,10 @@ interface StockAdjustmentRow {
   description: string | null
   items: Array<{
     id: number
-    product_id: number
+    product_id: string
     quantity: number
     note: string | null
-    product: { id: number; code: string | null; name_en: string; name_kh: string }
+    product: { id: string; code: string | null; name_en: string; name_kh: string }
   }>
 }
 
@@ -349,7 +349,7 @@ const openEditDialog = (item: StockAdjustmentItem) => {
 
 const addLine = () => form.items.push(newLine())
 const removeLine = (index: number) => form.items.splice(index, 1)
-const isProductSelected = (productId: number, currentIndex: number) => form.items.some(
+const isProductSelected = (productId: string, currentIndex: number) => form.items.some(
   (line, index) => index !== currentIndex && line.productId === productId,
 )
 

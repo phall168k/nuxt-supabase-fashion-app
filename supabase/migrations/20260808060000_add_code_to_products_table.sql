@@ -5,10 +5,7 @@ alter table public.products
 
 -- Give existing products a stable, unique code before enforcing constraints.
 update public.products
-set code = 'PRD' || case
-    when length(id::text) < 7 then lpad(id::text, 7, '0')
-    else id::text
-end
+set code = 'PRD' || upper(substr(replace(id::text, '-', ''), 1, 10))
 where code is null;
 
 alter table public.products

@@ -147,7 +147,7 @@ interface BannerRow {
   title: string
   description: string | null
   thumbnail_path: string
-  product: { id: number; code: string } | null
+  product: { id: string; code: string } | null
 }
 
 interface Banner {
@@ -155,7 +155,7 @@ interface Banner {
   title: string
   description: string | null
   thumbnailUrl: string
-  product: { id: number; code: string } | null
+  product: { id: string; code: string } | null
 }
 
 interface ProductImageRow {
@@ -165,7 +165,7 @@ interface ProductImageRow {
 }
 
 interface ProductRow {
-  id: number
+  id: string
   code: string
   name_en: string
   name_kh: string
@@ -176,7 +176,7 @@ interface ProductRow {
 }
 
 interface Product {
-  id: number
+  id: string
   code: string
   nameEn: string
   nameKh: string

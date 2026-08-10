@@ -91,7 +91,7 @@
 interface CategoryRow { id: number; code: string; name_en: string; name_kh: string }
 interface ProductImageRow { image_path: string; is_active: boolean; sort_order: number }
 interface ProductRow {
-  id: number
+  id: string
   code: string
   name_en: string
   name_kh: string
@@ -101,7 +101,7 @@ interface ProductRow {
   images: ProductImageRow[]
 }
 interface Product {
-  id: number
+  id: string
   code: string
   nameEn: string
   nameKh: string

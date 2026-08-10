@@ -157,7 +157,7 @@ interface StockProduct {
 
 interface StockItem {
   id: number
-  productId: number
+  productId: string
   minStock: number
   stockIn: number
   stockOut: number
@@ -168,13 +168,13 @@ interface StockItem {
 
 interface StockRow {
   id: number
-  product_id: number
+  product_id: string
   min_stock: number
   stock_in: number
   stock_out: number
   stock_adjustment: number
   product: {
-    id: number
+    id: string
     code: string | null
     name_en: string
     name_kh: string

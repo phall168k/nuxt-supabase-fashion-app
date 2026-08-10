@@ -152,14 +152,14 @@ import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'MINI-POS-BANNER' })
 
-interface ProductOption { id: number; code: string; nameEn: string; nameKh: string }
+interface ProductOption { id: string; code: string; nameEn: string; nameKh: string }
 interface Banner {
   id: number
   title: string
   description: string | null
   thumbnailPath: string
   thumbnailUrl: string
-  productId: number
+  productId: string
   product: ProductOption
   isActive: boolean
   createdAt: string
@@ -169,10 +169,10 @@ interface BannerRow {
   title: string
   description: string | null
   thumbnail_path: string
-  product_id: number
+  product_id: string
   is_active: boolean
   created_at: string
-  product: { id: number; code: string; name_en: string; name_kh: string }
+  product: { id: string; code: string; name_en: string; name_kh: string }
 }
 
 const bucketName = 'fashion-images'
@@ -193,7 +193,7 @@ const params = reactive({ search: '', page: 1, limit: 10 })
 const dialogVisible = ref(false)
 const editingItem = ref<Banner | null>(null)
 const formRef = ref<FormInstance>()
-const form = reactive({ title: '', description: '', productId: null as number | null, isActive: true })
+const form = reactive({ title: '', description: '', productId: null as string | null, isActive: true })
 const thumbnailFile = ref<File | null>(null)
 const thumbnailPreview = ref<string | null>(null)
 

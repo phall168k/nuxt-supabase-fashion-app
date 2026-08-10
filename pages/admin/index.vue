@@ -109,7 +109,7 @@ interface SaleRow {
   sale_date: string
   sale_to: string
   payment_method: { name: string } | null
-  items: Array<{ quantity: number; unit_price: number; discount: number; product: { id: number; name_en: string; name_kh: string } }>
+  items: Array<{ quantity: number; unit_price: number; discount: number; product: { id: string; name_en: string; name_kh: string } }>
 }
 
 interface StockRow {
@@ -117,10 +117,10 @@ interface StockRow {
   stock_in: number
   stock_out: number
   stock_adjustment: number
-  product: { id: number; code: string; name_en: string; name_kh: string }
+  product: { id: string; code: string; name_en: string; name_kh: string }
 }
 
-interface LowStockProduct { id: number; code: string; nameEn: string; nameKh: string; available: number }
+interface LowStockProduct { id: string; code: string; nameEn: string; nameKh: string; available: number }
 interface RecentOrder { id: number; code: string; saleDate: string; paymentMethod: string; quantity: number; total: number }
 
 definePageMeta({ layout: 'default', middleware: 'auth' })
@@ -192,7 +192,7 @@ const renderCharts = async () => {
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: chartTextColor, usePointStyle: true, padding: 16 } } } },
   })
 
-  const sold = new Map<number, { nameEn: string; nameKh: string; quantity: number }>()
+  const sold = new Map<string, { nameEn: string; nameKh: string; quantity: number }>()
   for (const sale of sales.value) for (const item of sale.items) {
     const current = sold.get(item.product.id) || { nameEn: item.product.name_en, nameKh: item.product.name_kh, quantity: 0 }
     current.quantity += Number(item.quantity); sold.set(item.product.id, current)

@@ -220,7 +220,7 @@ useHead({ title: 'MINI-POS-SALE' })
 type SaleStatus = 'draft' | 'completed'
 
 interface ProductOption {
-  id: number
+  id: string
   code: string | null
   nameEn: string
   nameKh: string
@@ -234,7 +234,7 @@ interface PaymentMethodOption { id: number; name: string }
 interface SaleLine {
   id?: number
   key: string
-  productId: number | null
+  productId: string | null
   quantity: number
   unitPrice: number
   discount: number
@@ -262,11 +262,11 @@ interface SaleRow {
   description: string | null
   items: Array<{
     id: number
-    product_id: number
+    product_id: string
     quantity: number
     unit_price: number
     discount: number
-    product: { id: number; code: string | null; name_en: string; name_kh: string }
+    product: { id: string; code: string | null; name_en: string; name_kh: string }
   }>
 }
 
@@ -443,14 +443,14 @@ const openEditDialog = (item: SaleItem) => {
 
 const addLine = () => form.items.push(newLine())
 const removeLine = (index: number) => form.items.splice(index, 1)
-const isProductSelected = (productId: number, currentIndex: number) => form.items.some(
+const isProductSelected = (productId: string, currentIndex: number) => form.items.some(
   (line, index) => index !== currentIndex && line.productId === productId,
 )
-const originalCompletedQuantity = (productId: number) => {
+const originalCompletedQuantity = (productId: string) => {
   if (editingItem.value?.status !== 'completed') return 0
   return editingItem.value.items.find(line => line.productId === productId)?.quantity ?? 0
 }
-const availableForProduct = (productId: number) => {
+const availableForProduct = (productId: string) => {
   const product = productOptions.value.find(option => option.id === productId)
   return Math.max(0, (product?.available ?? 0) + originalCompletedQuantity(productId))
 }

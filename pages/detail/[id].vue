@@ -201,7 +201,7 @@
 <script setup lang="ts">
 interface ProductImageRow { id: number; image_path: string; is_active: boolean; sort_order: number }
 interface ProductRow {
-  id: number
+  id: string
   code: string
   name_en: string
   name_kh: string
@@ -213,7 +213,7 @@ interface ProductRow {
 }
 
 interface RelatedProductRow {
-  id: number
+  id: string
   name_en: string
   name_kh: string
   unit_price: number
@@ -223,7 +223,7 @@ interface RelatedProductRow {
 }
 
 interface RelatedProduct {
-  id: number
+  id: string
   nameEn: string
   nameKh: string
   unitPrice: number
@@ -238,9 +238,9 @@ const route = useRoute()
 const { t, locale } = useI18n()
 const supabase = useSupabaseClient()
 const bucketName = 'fashion-images'
-const productId = Number(route.params.id)
+const productId = String(route.params.id)
 
-if (!Number.isInteger(productId) || productId <= 0) {
+if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(productId)) {
   throw createError({ statusCode: 404, statusMessage: 'Product not found' })
 }
 
@@ -279,7 +279,7 @@ const { data: topSellingRows } = await useAsyncData(`top-selling-products-${prod
   if (rankingError) throw rankingError
   if (!ranking?.length) return []
 
-  const ids = ranking.map(item => Number(item.product_id))
+  const ids = ranking.map(item => String(item.product_id))
   const { data, error } = await supabase
     .from('products')
     .select('id, name_en, name_kh, unit_price, discount, stock:stocks(stock_in, stock_out, stock_adjustment), images:product_images(id, image_path, is_active, sort_order)')
@@ -288,7 +288,7 @@ const { data: topSellingRows } = await useAsyncData(`top-selling-products-${prod
   if (error) throw error
   const productsById = new Map(((data ?? []) as unknown as RelatedProductRow[]).map(item => [item.id, item]))
   return ranking.flatMap(rank => {
-    const item = productsById.get(Number(rank.product_id))
+    const item = productsById.get(String(rank.product_id))
     return item ? [{ ...item, total_sold: Number(rank.total_sold) }] : []
   })
 }, { default: () => [], lazy: true })
@@ -296,7 +296,7 @@ const { data: topSellingRows } = await useAsyncData(`top-selling-products-${prod
 const product = computed(() => {
   const value = row.value
   if (!value) return {
-    id: 0,
+    id: '',
     code: '',
     nameEn: '',
     nameKh: '',

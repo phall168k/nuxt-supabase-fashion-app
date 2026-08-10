@@ -85,11 +85,11 @@ import type { FormInstance, FormRules } from 'element-plus'
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'MINI-POS-PICKED-PRODUCT' })
 
-interface ProductOption { id: number; code: string; nameEn: string; nameKh: string; available: number; thumbnailUrl: string | null }
-interface PickedItem { id: number; productId: number; quantity: number; pickedById: string; createdAt: string; product: ProductOption }
+interface ProductOption { id: string; code: string; nameEn: string; nameKh: string; available: number; thumbnailUrl: string | null }
+interface PickedItem { id: number; productId: string; quantity: number; pickedById: string; createdAt: string; product: ProductOption }
 interface PickedRow {
-  id: number; product_id: number; quantity: number; picked_by_id: string; created_at: string
-  product: { id: number; code: string; name_en: string; name_kh: string; stock: { stock_in: number; stock_out: number; stock_adjustment: number } | null; images: Array<{ image_path: string; is_active: boolean; sort_order: number }> }
+  id: number; product_id: string; quantity: number; picked_by_id: string; created_at: string
+  product: { id: string; code: string; name_en: string; name_kh: string; stock: { stock_in: number; stock_out: number; stock_adjustment: number } | null; images: Array<{ image_path: string; is_active: boolean; sort_order: number }> }
 }
 
 const { t, locale } = useI18n()
@@ -109,7 +109,7 @@ const meta = reactive({ totalItems: 0 })
 const dialogVisible = ref(false)
 const editingItem = ref<PickedItem | null>(null)
 const formRef = ref<FormInstance>()
-const form = reactive({ productId: null as number | null, quantity: 1 })
+const form = reactive({ productId: null as string | null, quantity: 1 })
 
 const rules = computed<FormRules>(() => ({
   productId: [{ required: true, message: t('picked_product.product_required'), trigger: 'change' }],

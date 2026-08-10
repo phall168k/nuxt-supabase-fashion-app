@@ -5,7 +5,7 @@ create table public.banners (
     title varchar(255) not null,
     description text,
     thumbnail_path text not null,
-    product_id bigint not null
+    product_id uuid not null
         references public.products(id)
         on delete restrict,
     is_active boolean not null default true,

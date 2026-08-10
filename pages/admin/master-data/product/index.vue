@@ -244,7 +244,7 @@ interface CategoryCascaderOption {
 }
 
 interface Product {
-  id: number
+  id: string
   categoryId: number
   code: string
   nameEn: string
@@ -260,7 +260,7 @@ interface Product {
 }
 
 interface ProductRow {
-  id: number
+  id: string
   category_id: number
   code: string
   name_en: string
@@ -598,7 +598,7 @@ const uploadThumbnail = async (file: File) => {
   return path
 }
 
-const generateProductCode = (id: number) => `PRD${String(id).padStart(7, '0')}`
+const generateProductCode = (id: string) => `PRD${id.replaceAll('-', '').slice(0, 10).toUpperCase()}`
 
 const removeStoredThumbnails = async (paths: string[]) => {
   if (!paths.length) return
@@ -611,7 +611,7 @@ const submit = async () => {
   if (!valid || form.categoryId === null) return
 
   let uploadedPaths: string[] = []
-  let createdProductId: number | null = null
+  let createdProductId: string | null = null
   const oldPaths = editingItem.value?.thumbnailPaths ?? []
 
   try {
@@ -633,7 +633,7 @@ const submit = async () => {
       updated_at: new Date().toISOString(),
     }
 
-    let productId: number
+    let productId: string
     if (editingItem.value) {
       const { error } = await supabase
         .from('products')
@@ -652,7 +652,7 @@ const submit = async () => {
         .single()
       if (error) throw error
 
-      createdProductId = data.id as number
+      createdProductId = data.id as string
       productId = createdProductId
       const { error: codeError } = await supabase
         .from('products')

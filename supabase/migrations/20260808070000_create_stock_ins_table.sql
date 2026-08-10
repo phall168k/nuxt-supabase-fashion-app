@@ -22,7 +22,7 @@ create table public.stock_in_items (
     stock_in_id bigint not null
         references public.stock_ins(id)
         on delete cascade,
-    product_id bigint not null
+    product_id uuid not null
         references public.products(id)
         on delete restrict,
     quantity integer not null check (quantity > 0),
@@ -138,7 +138,7 @@ begin
 
     select count(*), count(distinct product_id)
     into v_item_count, v_distinct_count
-    from jsonb_to_recordset(p_items) as item(product_id bigint, quantity integer, note text);
+    from jsonb_to_recordset(p_items) as item(product_id uuid, quantity integer, note text);
 
     if v_item_count <> v_distinct_count then
         raise exception 'A product cannot be selected more than once';
@@ -146,7 +146,7 @@ begin
 
     if exists (
         select 1
-        from jsonb_to_recordset(p_items) as item(product_id bigint, quantity integer, note text)
+        from jsonb_to_recordset(p_items) as item(product_id uuid, quantity integer, note text)
         where product_id is null or quantity is null or quantity <= 0
     ) then
         raise exception 'Every item requires a product and a positive quantity';
@@ -177,7 +177,7 @@ begin
         item.product_id,
         item.quantity,
         nullif(btrim(item.note), '')
-    from jsonb_to_recordset(p_items) as item(product_id bigint, quantity integer, note text);
+    from jsonb_to_recordset(p_items) as item(product_id uuid, quantity integer, note text);
 
     return v_stock_in;
 end;

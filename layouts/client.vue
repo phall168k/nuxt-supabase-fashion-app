@@ -406,12 +406,12 @@
   }
 
   interface CartProductRow {
-    id: number; name_en: string; name_kh: string; unit_price: number; discount: number
+    id: string; name_en: string; name_kh: string; unit_price: number; discount: number
     images: Array<{ image_path: string; is_active: boolean; sort_order: number }>
     stock: { stock_in: number; stock_out: number; stock_adjustment: number } | null
   }
   interface CartRow { id: number; quantity: number; product: CartProductRow }
-  interface CartProduct { id: number; nameEn: string; nameKh: string; unitPrice: number; discount: number; available: number; thumbnailUrl: string | null }
+  interface CartProduct { id: string; nameEn: string; nameKh: string; unitPrice: number; discount: number; available: number; thumbnailUrl: string | null }
   interface CartItem { id: number; quantity: number; product: CartProduct }
   interface CartPaymentMethod { id: number; name: string; logoUrl: string | null; bankAccount: string | null; currency: string | null; merchantCity: string; storeLabel: string | null }
   interface GeneratedKHQR { qr: string; md5: string; amount: number; billNumber: string; expiresAt: number }
@@ -420,8 +420,8 @@
     success: boolean
     data: { paid: boolean; transaction: { toAccountId?: string; currency?: string; amount?: number | string } | null }
   }
-  interface PurchaseProduct { id: number; name_en: string; name_kh: string; imageUrl: string | null }
-  interface PurchaseProductRow { id: number; name_en: string; name_kh: string; images: Array<{ image_path: string; is_active: boolean; sort_order: number }> }
+  interface PurchaseProduct { id: string; name_en: string; name_kh: string; imageUrl: string | null }
+  interface PurchaseProductRow { id: string; name_en: string; name_kh: string; images: Array<{ image_path: string; is_active: boolean; sort_order: number }> }
   interface PurchaseLine { id: number; quantity: number; unitPrice: number; discount: number; product: PurchaseProduct }
   interface PurchaseOrder { id: number; code: string; saleDate: string; status: 'draft' | 'completed'; paymentMethod: { id: number; name: string } | null; items: PurchaseLine[] }
   interface PurchaseOrderRow {
