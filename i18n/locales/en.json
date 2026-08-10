@@ -303,6 +303,7 @@
         "deleted": "Banner deleted successfully"
     },
     "sale": {
+        "all_payment_methods": "All payment methods",
         "title": "Sales",
         "description": "Create sales and keep product stock-out totals synchronized.",
         "search_placeholder": "Search code or description",

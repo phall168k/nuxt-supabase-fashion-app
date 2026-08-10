@@ -17,6 +17,21 @@
             <el-option :label="t('sale.status_draft')" value="draft" />
             <el-option :label="t('sale.status_completed')" value="completed" />
           </el-select>
+          <el-select
+            v-model="params.paymentMethodId"
+            clearable
+            filterable
+            class="sm:!w-[190px]"
+            :placeholder="t('sale.all_payment_methods')"
+            @change="filterItems"
+          >
+            <el-option
+              v-for="method in paymentMethodOptions"
+              :key="method.id"
+              :label="method.name"
+              :value="method.id"
+            />
+          </el-select>
           <el-input
             v-model="params.search"
             clearable
@@ -282,7 +297,7 @@ const items = ref<SaleItem[]>([])
 const productOptions = ref<ProductOption[]>([])
 const paymentMethodOptions = ref<PaymentMethodOption[]>([])
 const meta = reactive({ totalItems: 0 })
-const params = reactive({ search: '', status: '' as '' | SaleStatus, page: 1, limit: 10 })
+const params = reactive({ search: '', status: '' as '' | SaleStatus, paymentMethodId: null as number | null, page: 1, limit: 10 })
 const dialogVisible = ref(false)
 const editingItem = ref<SaleItem | null>(null)
 const formRef = ref<FormInstance>()
@@ -390,6 +405,7 @@ const loadItems = async () => {
       .range(from, from + params.limit - 1)
     if (search) query = query.or(`code.ilike.%${search}%,description.ilike.%${search}%`)
     if (params.status) query = query.eq('status', params.status)
+    if (typeof params.paymentMethodId === 'number') query = query.eq('payment_method_id', params.paymentMethodId)
     const { data, count, error } = await query
     if (error) throw error
     items.value = ((data ?? []) as unknown as SaleRow[]).map(mapRow)
