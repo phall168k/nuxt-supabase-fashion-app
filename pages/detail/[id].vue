@@ -235,6 +235,7 @@ interface RelatedProduct {
 definePageMeta({ layout: 'client', key: route => route.fullPath })
 
 const route = useRoute()
+const requestUrl = useRequestURL()
 const { t, locale } = useI18n()
 const supabase = useSupabaseClient()
 const bucketName = 'fashion-images'
@@ -370,6 +371,57 @@ const selectedImage = computed(() => product.value.images[selectedImageIndex.val
 const formatPrice = (value: number) => new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', minimumFractionDigits: 2,
 }).format(value)
+const seoTitle = computed(() => productName.value
+  ? `${productName.value} | ${t('app.title')}`
+  : t('app.title'))
+const seoThumbnail = computed(() => product.value.images[0]?.url || '')
+const seoPrice = computed(() => product.value.salePrice.toFixed(2))
+const seoDescription = computed(() => productName.value
+  ? `${productName.value} — ${formatPrice(product.value.salePrice)}`
+  : t('app.title'))
+const canonicalUrl = computed(() => new URL(route.fullPath, requestUrl.origin).toString())
+
+useSeoMeta({
+  title: () => seoTitle.value,
+  description: () => seoDescription.value,
+  ogTitle: () => seoTitle.value,
+  ogDescription: () => seoDescription.value,
+  ogType: 'website',
+  ogUrl: () => canonicalUrl.value,
+  ogImage: () => seoThumbnail.value || undefined,
+  ogImageAlt: () => productName.value || t('app.title'),
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => seoTitle.value,
+  twitterDescription: () => seoDescription.value,
+  twitterImage: () => seoThumbnail.value || undefined,
+})
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  meta: [
+    { property: 'product:price:amount', content: seoPrice.value },
+    { property: 'product:price:currency', content: 'USD' },
+  ],
+  script: row.value ? [{
+    type: 'application/ld+json',
+    textContent: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: productName.value,
+      image: seoThumbnail.value ? [seoThumbnail.value] : undefined,
+      sku: product.value.code,
+      offers: {
+        '@type': 'Offer',
+        url: canonicalUrl.value,
+        priceCurrency: 'USD',
+        price: seoPrice.value,
+        availability: product.value.stockOnHand > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      },
+    }),
+  }] : [],
+}))
 
 watch(productStatus, status => {
   if (status === 'success' && !row.value) {
@@ -383,5 +435,4 @@ watch(productStatus, status => {
   }
 }, { immediate: true })
 
-useHead(() => ({ title: `${productName.value} | Fashion Shop` }))
 </script>
