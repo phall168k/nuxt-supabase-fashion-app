@@ -89,6 +89,14 @@
           </el-tag>
         </div>
 
+        <ClientAddToCartButton
+          v-if="product.id"
+          :product-id="product.id"
+          variant="button"
+          :disabled="product.stockOnHand <= 0"
+          class="mt-5 w-full"
+        />
+
         <dl class="mt-6 divide-y divide-slate-200 text-sm">
           <div class="flex justify-between gap-4 py-4">
             <dt class="text-slate-500">{{ t('detail.category') }}</dt>
@@ -111,7 +119,8 @@
           :to="`/detail/${item.id}`"
           class="group min-w-0"
         >
-          <div class="aspect-[3/4] overflow-hidden rounded-md bg-slate-100">
+          <div class="relative aspect-[3/4] overflow-hidden rounded-md bg-slate-100">
+            <ClientAddToCartButton :product-id="item.id" class="absolute right-2 top-2 z-10" />
             <el-image
               v-if="item.thumbnailUrl"
               :src="item.thumbnailUrl"
