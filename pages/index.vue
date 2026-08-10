@@ -280,67 +280,82 @@ const loadMoreProducts = async () => {
 
 await loadMoreProducts()
 
-const canonicalUrl = computed(() => `${requestUrl.origin}${requestUrl.pathname}`)
-const seoTitle = 'Fashion Store | Trendy Clothing, Shoes & Accessories Online'
-const seoDescription = 'Shop the latest fashion for men and women, including trendy clothing, shoes, bags, accessories, and more. Discover stylish, quality products at great prices and upgrade your everyday look.'
-const socialImage = computed(() => new URL('/logo.png', requestUrl.origin).toString())
+const config = useRuntimeConfig();
 
-useSeoMeta(() => ({
-  title: seoTitle,
-  description: seoDescription,
-  ogTitle: seoTitle,
-  ogDescription: seoDescription,
-  ogSiteName: t('app.title'),
+const route = useRoute()
+const siteUrl = config.public.nuxtPublicUrl;
+
+const title = 'Fashion Store | Trendy Clothing, Shoes & Accessories Online'
+const description =
+  'Shop the latest fashion for men and women, including trendy clothing, shoes, bags, accessories, and more. Discover stylish, quality products at great prices and upgrade your everyday look.'
+
+const currentUrl = computed(() => `${siteUrl}${route.path}`)
+const ogImage = `${siteUrl}/logo.png`
+const ogImageAlt = 'Fashion Shop OG Image Preview'
+
+
+useSeoMeta({
+  title,
+  description,
+
   ogType: 'website',
-  ogUrl: canonicalUrl.value,
-  ogImage: socialImage.value,
-  ogImageAlt: seoTitle,
-  ogLocale: locale.value === 'km' ? 'km_KH' : 'en_US',
-  twitterCard: 'summary_large_image',
-  twitterTitle: seoTitle,
-  twitterDescription: seoDescription,
-  twitterImage: socialImage.value,
-  robots: 'index, follow',
-}))
+  ogSiteName: 'Fashion Store | Trendy Clothing, Shoes & Accessories Online',
+  ogTitle: title,
+  ogDescription: description,
+  ogUrl: currentUrl,
+  ogImage,
+  ogImageSecureUrl: ogImage,
+  ogImageAlt,
 
-useHead(() => ({
-  htmlAttrs: { lang: locale.value === 'km' ? 'km' : 'en' },
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-  meta: [{ property: 'fb:app_id', content: '390063447027213' }],
-  script: [{
-    type: 'application/ld+json',
-    innerHTML: JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'OnlineStore',
-      name: 'Fashion Store',
-      url: canonicalUrl.value,
-      description: seoDescription,
-      logo: socialImage.value,
-      image: socialImage.value,
-      hasOfferCatalog: {
-        '@type': 'OfferCatalog',
-        name: t('home.products'),
-        itemListElement: products.value.map((product, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          url: `${requestUrl.origin}${productItemPath(product)}`,
-          item: {
-            '@type': 'Product',
-            name: productTitle(product),
-            image: product.thumbnailUrl || undefined,
-            sku: product.code,
-            offers: {
-              '@type': 'Offer',
-              priceCurrency: 'USD',
-              price: Math.max(0, product.unitPrice - product.discount).toFixed(2),
-              availability: 'https://schema.org/InStock',
-            },
-          },
-        })),
-      },
-    }),
-  }],
-}))
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description,
+  twitterImage: ogImage,
+  twitterImageAlt: ogImageAlt,
+
+  robots: 'index, follow',
+  author: 'EOM Phall'
+})
+
+useHead({
+  htmlAttrs: {
+    lang: 'en'
+  },
+  link: [
+    {
+      rel: 'canonical',
+      href: currentUrl
+    }
+  ],
+  meta: [
+    {
+      property: 'fb:app_id',
+      content: '390063447027213'
+    },
+    {
+      property: 'og:image:width',
+      content: '1200'
+    },
+    {
+      property: 'og:image:height',
+      content: '630'
+    },
+    {
+      property: 'og:image:type',
+      content: 'image/jpeg'
+    },
+    {
+      name: 'theme-color',
+      content: '#0f172a'
+    }
+  ]
+})
+
+
+
+
+
+
 </script>
 
 <style scoped>

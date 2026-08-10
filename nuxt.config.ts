@@ -1,6 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/logo.png?v=2' },
+        { rel: 'apple-touch-icon', href: '/logo.png?v=2' },
+      ],
+    },
+  },
   devtools: { 
     enabled: process.env.NODE_ENV === 'development',
   },
@@ -45,7 +53,8 @@ export default defineNuxtConfig({
     bakongApiToken: process.env.NUXT_BAKONG_API_TOKEN,
     bakongApiBaseUrl: process.env.NUXT_BAKONG_API_BASE_URL || 'https://api-bakong.nbc.gov.kh',
     public: {
-      apiBaseUrl: process.env.API_BASE_URL
+      apiBaseUrl: process.env.API_BASE_URL,
+      nuxtPublicUrl: process.env.NUXT_PUBLIC_URL,
     }
   },
 })
