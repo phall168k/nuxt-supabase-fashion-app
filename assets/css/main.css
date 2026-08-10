@@ -1,0 +1,18 @@
+html:root {
+  --el-color-primary: #0f172a !important;
+  --el-color-primary-rgb: 15, 23, 42 !important;
+  --el-color-primary-light-3: #575d69 !important;
+  --el-color-primary-light-5: #878b95 !important;
+  --el-color-primary-light-7: #b7bac0 !important;
+  --el-color-primary-light-8: #cfd1d4 !important;
+  --el-color-primary-light-9: #e7e8ea !important;
+  --el-color-primary-dark-2: #0c1222 !important;
+  --el-color-success: #62d2c6 !important;
+  --el-color-success-rgb: 98, 210, 198 !important;
+  --el-color-success-light-3: #91e0d7 !important;
+  --el-color-success-light-5: #b1e9e3 !important;
+  --el-color-success-light-7: #d0f2ee !important;
+  --el-color-success-light-8: #e0f6f4 !important;
+  --el-color-success-light-9: #effbf9 !important;
+  --el-color-success-dark-2: #4ea89e !important;
+}

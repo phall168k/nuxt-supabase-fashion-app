@@ -431,7 +431,7 @@ watch(currentUserId, () => loadAdminProfile(), { immediate: true })
 .language-switcher {
   --el-segmented-bg-color: #f8fafc;
   --el-segmented-item-hover-bg-color: #eef2f7;
-  --el-segmented-item-selected-bg-color: #f59e0b;
+  --el-segmented-item-selected-bg-color: #0f172a;
   --el-segmented-item-selected-color: #ffffff;
   --el-segmented-item-selected-disabled-color: #ffffff;
   border: 1px solid #e2e8f0;
