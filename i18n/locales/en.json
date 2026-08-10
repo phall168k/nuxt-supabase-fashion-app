@@ -310,12 +310,16 @@
         "deleted": "Payment method deleted successfully"
     },
     "home": {
+        "seo_title": "Fashion Shop | Shop Clothing Online",
+        "seo_description": "Discover the latest clothing and fashion products. Shop available styles online at Fashion Shop.",
+        "seo_heading": "Shop clothing and fashion online",
         "shop_now": "Shop now",
         "no_banners": "No active banners",
         "products": "Products",
         "products_description": "Explore our latest products",
         "no_products": "No products available",
-        "all_products_loaded": "You have reached the end"
+        "all_products_loaded": "You have reached the end",
+        "view_all_products": "View all products"
     },
   "detail": {
     "loading": "Loading product...",

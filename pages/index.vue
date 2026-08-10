@@ -1,5 +1,6 @@
 <template>
   <main class="py-6 sm:py-8 lg:py-10">
+    <h1 class="sr-only">{{ t('home.seo_heading') }}</h1>
     <section class="mx-auto w-[90%] overflow-hidden rounded-lg bg-slate-100 shadow-sm">
       <el-carousel
         v-if="banners.length"
@@ -9,7 +10,11 @@
         trigger="click"
       >
         <el-carousel-item v-for="banner in banners" :key="banner.id">
-          <NuxtLink :to="productPath(banner)" class="group relative block h-full w-full">
+          <component
+            :is="banner.product ? NuxtLinkComponent : 'div'"
+            :to="banner.product ? productPath(banner) : undefined"
+            class="group relative block h-full w-full"
+          >
             <el-image
               :src="banner.thumbnailUrl"
               :alt="banner.title"
@@ -31,9 +36,9 @@
             <div class="absolute inset-0 bg-gradient-to-r from-black/65 via-black/20 to-transparent" />
             <div class="absolute inset-y-0 left-0 flex w-full max-w-2xl items-center px-6 sm:px-10 lg:px-16">
               <div class="text-white">
-                <h1 class="text-2xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                <h2 class="text-2xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                   {{ banner.title }}
-                </h1>
+                </h2>
                 <p v-if="banner.description" class="mt-3 line-clamp-3 max-w-xl text-sm text-white/90 sm:text-base lg:text-lg">
                   {{ banner.description }}
                 </p>
@@ -43,7 +48,7 @@
                 </span>
               </div>
             </div>
-          </NuxtLink>
+          </component>
         </el-carousel-item>
       </el-carousel>
 
@@ -59,6 +64,9 @@
           <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">{{ t('home.products') }}</h2>
           <p class="mt-1 text-sm text-slate-500">{{ t('home.products_description') }}</p>
         </div>
+        <NuxtLink to="/search" class="text-sm font-semibold text-slate-700 hover:text-black">
+          {{ t('home.view_all_products') }}
+        </NuxtLink>
       </div>
 
       <div
@@ -177,10 +185,15 @@ interface Product {
   thumbnailUrl: string | null
 }
 
-definePageMeta({ layout: 'client', title: 'Fashion Shop' })
+definePageMeta({ 
+  layout: 'client', 
+  title: 'Fashion Shop' 
+})
 
 const { t, locale } = useI18n()
 const supabase = useSupabaseClient()
+const NuxtLinkComponent = resolveComponent('NuxtLink')
+const requestUrl = useRequestURL()
 const bucketName = 'fashion-images'
 const productPageSize = 15
 const products = ref<Product[]>([])
@@ -208,7 +221,7 @@ const banners = computed<Banner[]>(() => bannerRows.value.map(row => ({
 })))
 
 const productPath = (banner: Banner) => ({
-  path: `/detail/${banner.product?.id}`,
+  path: `/detail/${banner.product!.id}`,
 })
 
 const productTitle = (product: Product) => locale.value === 'km' ? product.nameKh : product.nameEn
@@ -265,7 +278,66 @@ const loadMoreProducts = async () => {
   }
 }
 
-onMounted(loadMoreProducts)
+await loadMoreProducts()
+
+const canonicalUrl = computed(() => `${requestUrl.origin}${requestUrl.pathname}`)
+const seoTitle = computed(() => t('home.seo_title'))
+const seoDescription = computed(() => t('home.seo_description'))
+const socialImage = computed(() => banners.value[0]?.thumbnailUrl)
+
+useSeoMeta(() => ({
+  title: seoTitle.value,
+  description: seoDescription.value,
+  ogTitle: seoTitle.value,
+  ogDescription: seoDescription.value,
+  ogSiteName: t('app.title'),
+  ogType: 'website',
+  ogUrl: canonicalUrl.value,
+  ogImage: socialImage.value,
+  ogLocale: locale.value === 'km' ? 'km_KH' : 'en_US',
+  twitterCard: 'summary_large_image',
+  twitterTitle: seoTitle.value,
+  twitterDescription: seoDescription.value,
+  twitterImage: socialImage.value,
+  robots: 'index, follow',
+}))
+
+useHead(() => ({
+  htmlAttrs: { lang: locale.value === 'km' ? 'km' : 'en' },
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  meta: [{ property: 'fb:app_id', content: '390063447027213' }],
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'OnlineStore',
+      name: t('app.title'),
+      url: canonicalUrl.value,
+      description: seoDescription.value,
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: t('home.products'),
+        itemListElement: products.value.map((product, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: `${requestUrl.origin}${productItemPath(product)}`,
+          item: {
+            '@type': 'Product',
+            name: productTitle(product),
+            image: product.thumbnailUrl || undefined,
+            sku: product.code,
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'USD',
+              price: Math.max(0, product.unitPrice - product.discount).toFixed(2),
+              availability: 'https://schema.org/InStock',
+            },
+          },
+        })),
+      },
+    }),
+  }],
+}))
 </script>
 
 <style scoped>
