@@ -161,7 +161,7 @@
             v-model="form.unitPrice"
             :min="0"
             :precision="2"
-            :step="0.5"
+            step="any"
             controls-position="right"
             class="!w-full"
           />
@@ -172,7 +172,7 @@
             :min="0"
             :max="form.unitPrice"
             :precision="2"
-            :step="1"
+            step="any"
             controls-position="right"
             class="!w-full"
           />
