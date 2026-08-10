@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-interface CategoryRow { id: number; code: string; name_en: string; name_kh: string }
+interface CategoryRow { id: number; code: string; name_en: string; name_kh: string; parent_id: number | null }
 interface ProductImageRow { image_path: string; is_active: boolean; sort_order: number }
 interface ProductRow {
   id: string
@@ -124,6 +124,7 @@ const hasMore = ref(true)
 const loadError = ref(false)
 const fetchedCount = ref(0)
 const requestVersion = ref(0)
+const productCategoryIds = ref<number[]>([])
 const categoryCode = computed(() => typeof route.query['category-code'] === 'string'
   ? route.query['category-code'].trim()
   : '')
@@ -145,12 +146,13 @@ const loadMoreProducts = async () => {
 
     while (!availableRows.length && hasMore.value && version === requestVersion.value) {
       const from = fetchedCount.value
-      const { data, error } = await supabase
+      const query = supabase
         .from('products')
         .select('id, code, name_en, name_kh, unit_price, discount, stock:stocks!inner(stock_in, stock_out, stock_adjustment), images:product_images(image_path, is_active, sort_order)')
-        .eq('category_id', category.value.id)
+        .in('category_id', productCategoryIds.value)
         .order('id', { ascending: true })
         .range(from, from + pageSize - 1)
+      const { data, error } = await query
 
       if (error) throw error
       if (version !== requestVersion.value) return
@@ -194,6 +196,7 @@ const resetCategory = async () => {
   hasMore.value = true
   loadError.value = false
   loading.value = false
+  productCategoryIds.value = []
 
   if (!categoryCode.value) return
 
@@ -201,7 +204,7 @@ const resetCategory = async () => {
   try {
     const { data, error } = await supabase
       .from('categories')
-      .select('id, code, name_en, name_kh')
+      .select('id, code, name_en, name_kh, parent_id')
       .eq('code', categoryCode.value)
       .eq('is_active', true)
       .maybeSingle()
@@ -209,6 +212,22 @@ const resetCategory = async () => {
     if (error) throw error
     if (version !== requestVersion.value) return
     category.value = data as CategoryRow | null
+
+    if (category.value?.parent_id === null) {
+      const { data: children, error: childrenError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('parent_id', category.value.id)
+        .eq('is_active', true)
+      if (childrenError) throw childrenError
+      if (version !== requestVersion.value) return
+      productCategoryIds.value = [
+        category.value.id,
+        ...(children ?? []).map(child => child.id),
+      ]
+    } else if (category.value) {
+      productCategoryIds.value = [category.value.id]
+    }
   } catch {
     if (version === requestVersion.value) loadError.value = true
   } finally {
