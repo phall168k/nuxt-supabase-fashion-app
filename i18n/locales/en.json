@@ -115,6 +115,7 @@
     "website_content": "Website Content",
     "sales": "Sales",
     "category": {
+        "code_auto_generated": "Generated automatically (CAT00001)",
         "title": "Categories",
         "description": "Create and manage product categories.",
         "search_placeholder": "Search code or name",

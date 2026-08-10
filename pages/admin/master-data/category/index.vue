@@ -117,7 +117,7 @@
         @submit.prevent="submit"
       >
         <el-form-item :label="t('columns.code')" prop="code">
-          <el-input v-model="form.code" placeholder="BEV" />
+          <el-input v-model="form.code" :placeholder="t('category.code_auto_generated')" disabled />
         </el-form-item>
         <el-form-item :label="t('columns.icon')" prop="icon">
           <el-input v-model="form.icon" placeholder="solar:t-shirt-outline">
@@ -244,7 +244,6 @@ const emptyForm = () => ({
 const form = reactive(emptyForm())
 
 const rules = computed<FormRules>(() => ({
-  code: [{ required: true, message: t('category.code_required'), trigger: 'blur' }],
   nameEn: [{ required: true, message: t('category.name_en_required'), trigger: 'blur' }],
   nameKh: [{ required: true, message: t('category.name_kh_required'), trigger: 'blur' }],
 }))
@@ -444,7 +443,6 @@ const submit = async () => {
   try {
     submitting.value = true
     const values = {
-      code: form.code.trim(),
       icon: form.icon.trim() || null,
       name_en: form.nameEn.trim(),
       name_kh: form.nameKh.trim(),
@@ -454,7 +452,7 @@ const submit = async () => {
     const { error } = editingItem.value
       ? await supabase
           .from('categories')
-          .update(values)
+          .update({ ...values, code: form.code })
           .eq('id', editingItem.value.id)
       : await supabase
           .from('categories')

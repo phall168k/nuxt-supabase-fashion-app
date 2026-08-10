@@ -534,8 +534,11 @@ const loadNextProductCode = async () => {
 
     if (error) throw error
 
-    const latestId = Number(data?.[0]?.id ?? 0)
-    form.code = generateProductCode(latestId + 1)
+    const latestId = data?.[0]?.id
+    const numericId = Number(latestId)
+    form.code = Number.isSafeInteger(numericId)
+      ? generateProductCode(numericId + 1)
+      : generateProductCode(crypto.randomUUID())
   } catch (error) {
     form.code = ''
     useNotification(getErrorMessage(error, t('product.code_preview_failed')), 'warning')
@@ -598,7 +601,11 @@ const uploadThumbnail = async (file: File) => {
   return path
 }
 
-const generateProductCode = (id: string) => `PRD${id.replaceAll('-', '').slice(0, 10).toUpperCase()}`
+const generateProductCode = (id: string | number) => {
+  const value = String(id)
+  if (/^\d+$/.test(value)) return `PRD${value.padStart(7, '0')}`
+  return `PRD${value.replace(/-/g, '').slice(0, 10).toUpperCase()}`
+}
 
 const removeStoredThumbnails = async (paths: string[]) => {
   if (!paths.length) return
@@ -652,7 +659,7 @@ const submit = async () => {
         .single()
       if (error) throw error
 
-      createdProductId = data.id as string
+      createdProductId = String(data.id)
       productId = createdProductId
       const { error: codeError } = await supabase
         .from('products')

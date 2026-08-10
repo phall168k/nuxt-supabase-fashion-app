@@ -115,6 +115,7 @@
     "website_content": "មាតិកាគេហទំព័រ",
     "sales": "ការលក់",
     "category": {
+        "code_auto_generated": "បង្កើតដោយស្វ័យប្រវត្តិ (CAT00001)",
         "title": "ប្រភេទ",
         "description": "បង្កើត និងគ្រប់គ្រងប្រភេទផលិតផល។",
         "search_placeholder": "ស្វែងរកតាមកូដ ឬឈ្មោះ",
