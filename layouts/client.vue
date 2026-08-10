@@ -26,21 +26,32 @@
               <Icon name="iconamoon:search-bold"/>
             </template>
           </el-input>
-          <el-dropdown trigger="click" placement="bottom-end" @command="handleAccountCommand">
+          <el-dropdown trigger="click" placement="bottom-end" @command="handleAccountCommand" @visible-change="handleAccountDropdownVisibility">
             <button
               type="button"
               class="flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
               :aria-label="t('client_account.account')"
             >
-              <Icon size="25" name="lucide:user-round" />
+              <el-avatar v-if="user" :key="profileAvatarUrl" :size="34" :src="profileAvatarUrl || undefined" class="border border-slate-200 bg-slate-800 text-xs text-white">
+                {{ customerInitials }}
+              </el-avatar>
+              <Icon v-else size="25" name="lucide:user-round" />
             </button>
             <template #dropdown>
               <el-dropdown-menu class="min-w-48">
-                <div v-if="user" class="border-b border-slate-100 px-4 py-2.5">
-                  <p class="max-w-52 truncate text-sm font-semibold text-slate-800">{{ customerName }}</p>
-                  <p class="mt-0.5 max-w-52 truncate text-xs text-slate-500">{{ user.email }}</p>
+                <div v-if="user" v-loading="clientProfileLoading" element-loading-background="rgba(255, 255, 255, 0.82)" class="flex min-h-[69px] min-w-64 items-center gap-3 border-b border-slate-100 px-4 py-3">
+                  <el-avatar :key="profileAvatarUrl" :size="44" :src="profileAvatarUrl || undefined" class="shrink-0 bg-slate-800 text-sm text-white">{{ customerInitials }}</el-avatar>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-semibold text-slate-800">{{ customerName }}</p>
+                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ user.email }}</p>
+                    <el-tag v-if="clientProfile" class="mt-1.5" size="small" effect="plain">{{ t(`user_profile.${clientProfile.role}`) }}</el-tag>
+                  </div>
                 </div>
-                <el-dropdown-item v-if="user" command="edit-profile">
+                <el-dropdown-item v-if="clientProfile?.role === 'admin'" command="admin-dashboard">
+                  <Icon name="lucide:layout-dashboard" class="mr-2" />
+                  {{ t('menu.dashboard') }}
+                </el-dropdown-item>
+                <el-dropdown-item v-if="user" @click="openProfileDialog">
                   <Icon name="lucide:user-pen" class="mr-2" />
                   {{ t('headers.edit_profile') }}
                 </el-dropdown-item>
@@ -325,17 +336,31 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="profileDialogVisible" :title="t('headers.edit_profile')" width="min(92vw, 460px)" align-center append-to-body @closed="profileFormRef?.clearValidate()">
+    <el-dialog v-model="profileDialogVisible" width="min(94vw, 620px)" align-center append-to-body :show-close="false" @closed="resetProfileEditor">
+      <template #header>
+        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+          <div><h2 class="text-lg font-bold text-slate-900">{{ t('client_account.profile_title') }}</h2><p class="mt-1 text-sm text-slate-500">{{ t('client_account.profile_description') }}</p></div>
+          <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700" @click="profileDialogVisible = false"><Icon name="lucide:x" size="19" /></button>
+        </div>
+      </template>
+      <div class="mb-6 flex flex-col items-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 px-5 py-6 text-white sm:flex-row sm:text-left">
+        <el-avatar :size="92" :src="profileAvatarPreview || undefined" class="border-4 border-white/25 bg-white/15 text-2xl">{{ profileFormInitials }}</el-avatar>
+        <div class="mt-4 min-w-0 flex-1 sm:ml-5 sm:mt-0">
+          <p class="truncate text-xl font-bold">{{ profileForm.fullName || customerName }}</p>
+          <p class="mt-1 truncate text-sm text-white/70">{{ user?.email }}</p>
+          <div class="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+            <el-upload accept="image/jpeg,image/png,image/webp" :auto-upload="false" :show-file-list="false" :on-change="selectProfileAvatar"><el-button size="small" plain>{{ t('user_profile.choose_profile') }}</el-button></el-upload>
+            <el-button v-if="profileAvatarPreview" size="small" plain @click="removeProfileAvatar">{{ t('user_profile.remove_profile') }}</el-button>
+          </div>
+          <p class="mt-2 text-xs text-white/55">{{ t('user_profile.profile_help') }}</p>
+        </div>
+      </div>
       <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-position="top" @submit.prevent="saveProfile">
-        <el-form-item :label="t('sign_up.full_name')" prop="fullName">
-          <el-input v-model="profileForm.fullName" clearable autocomplete="name" />
-        </el-form-item>
-        <el-form-item :label="t('client_account.email')">
-          <el-input :model-value="user?.email" disabled />
-        </el-form-item>
-        <el-form-item :label="t('sign_up.phone')" prop="phone">
-          <el-input v-model="profileForm.phone" clearable autocomplete="tel" />
-        </el-form-item>
+        <div class="grid gap-x-4 sm:grid-cols-2">
+          <el-form-item :label="t('sign_up.full_name')" prop="fullName"><el-input v-model="profileForm.fullName" clearable autocomplete="name"><template #prefix><Icon name="lucide:user-round" /></template></el-input></el-form-item>
+          <el-form-item :label="t('sign_up.phone')" prop="phone"><el-input v-model="profileForm.phone" clearable autocomplete="tel"><template #prefix><Icon name="lucide:phone" /></template></el-input></el-form-item>
+        </div>
+        <el-form-item :label="t('client_account.email')"><el-input :model-value="user?.email" disabled><template #prefix><Icon name="lucide:mail" /></template></el-input><p class="mt-1.5 text-xs text-slate-400">{{ t('client_account.email_help') }}</p></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="profileDialogVisible = false">{{ t('cancel') }}</el-button>
@@ -363,7 +388,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { FormInstance, FormRules } from 'element-plus'
+  import type { FormInstance, FormRules, UploadFile } from 'element-plus'
   import QRCode from 'qrcode'
 
 
@@ -404,6 +429,7 @@
     payment_method: { id: number; name: string } | null
     items: Array<{ id: number; quantity: number; unit_price: number; discount: number; product: PurchaseProductRow }>
   }
+  interface ClientProfile { id: number; userId: string; fullName: string; role: 'customer' | 'admin'; profile: string | null }
 
   const i18n = useI18n()
   const { locale, setLocale } = i18n
@@ -440,6 +466,10 @@
   const cartPaymentMethods = ref<CartPaymentMethod[]>([])
   const selectedPaymentMethodId = ref<number | null>(null)
   const imageBucket = 'fashion-images'
+  const currentUserId = computed(() => {
+    const authUser = user.value as { sub?: string; id?: string } | null
+    return authUser?.sub || authUser?.id || null
+  })
   const signingOut = ref(false)
   const profileDialogVisible = ref(false)
   const passwordDialogVisible = ref(false)
@@ -447,6 +477,12 @@
   const purchaseHistoryLoading = ref(false)
   const purchaseHistory = ref<PurchaseOrder[]>([])
   const savingProfile = ref(false)
+  const clientProfile = ref<ClientProfile | null>(null)
+  const clientProfileLoading = ref(false)
+  let clientProfileRequestId = 0
+  const profileAvatarFile = ref<File | null>(null)
+  const profileAvatarPreview = ref<string | null>(null)
+  const removeStoredProfileAvatar = ref(false)
   const changingPassword = ref(false)
   const profileFormRef = ref<FormInstance>()
   const passwordFormRef = ref<FormInstance>()
@@ -476,11 +512,61 @@
     ],
   }))
   const customerName = computed(() => {
-    const fullName = user.value?.user_metadata?.full_name
+    const fullName = clientProfile.value?.fullName
     return typeof fullName === 'string' && fullName.trim()
       ? fullName.trim()
       : t('client_account.account')
   })
+  const customerInitials = computed(() => customerName.value.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || '?')
+  const profileFormInitials = computed(() => profileForm.fullName.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || customerInitials.value)
+  const resolveProfileAvatarUrl = (profile: string | null | undefined) => {
+    const value = profile?.trim().replace(/^['"]|['"]$/g, '')
+    if (!value) return ''
+
+    const storageMarker = `/storage/v1/object/public/${imageBucket}/`
+    const markerIndex = value.indexOf(storageMarker)
+    if (markerIndex >= 0) {
+      const objectPath = value.slice(markerIndex + storageMarker.length)
+      return supabase.storage.from(imageBucket).getPublicUrl(objectPath).data.publicUrl
+    }
+    if (/^(https?:|data:|blob:)/i.test(value)) return value
+
+    const storagePath = value.startsWith(`${imageBucket}/`)
+      ? value.slice(imageBucket.length + 1)
+      : value.replace(/^\/+/, '')
+    return supabase.storage.from(imageBucket).getPublicUrl(storagePath).data.publicUrl
+  }
+  const profileAvatarUrl = computed(() => resolveProfileAvatarUrl(clientProfile.value?.profile))
+
+  const loadClientProfile = async () => {
+    const userId = currentUserId.value
+    const requestId = ++clientProfileRequestId
+    if (!userId) {
+      clientProfile.value = null
+      clientProfileLoading.value = false
+      return
+    }
+
+    clientProfileLoading.value = true
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('id, user_id, full_name, role, profile')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (error) throw error
+      if (requestId !== clientProfileRequestId || currentUserId.value !== userId) return
+      clientProfile.value = data ? { id: data.id, userId: data.user_id, fullName: data.full_name, role: data.role, profile: data.profile } as ClientProfile : null
+    } catch {
+      if (requestId === clientProfileRequestId) clientProfile.value = null
+    } finally {
+      if (requestId === clientProfileRequestId) clientProfileLoading.value = false
+    }
+  }
+
+  const handleAccountDropdownVisibility = (visible: boolean) => {
+    if (visible && currentUserId.value) void loadClientProfile()
+  }
 
   const purchaseProductName = (product: PurchaseProduct) => locale.value === 'km' ? product.name_kh : product.name_en
   const purchaseTotal = (order: PurchaseOrder) => order.items.reduce((total, line) => total + line.quantity * Math.max(0, line.unitPrice - line.discount), 0)
@@ -823,7 +909,57 @@
   onBeforeUnmount(() => {
     stopQrTimer()
     stopPaymentTimer()
+    if (profileAvatarPreview.value?.startsWith('blob:')) URL.revokeObjectURL(profileAvatarPreview.value)
   })
+
+  const resetProfileEditor = () => {
+    profileFormRef.value?.clearValidate()
+    if (profileAvatarPreview.value?.startsWith('blob:')) URL.revokeObjectURL(profileAvatarPreview.value)
+    profileAvatarFile.value = null
+    profileAvatarPreview.value = null
+    removeStoredProfileAvatar.value = false
+  }
+
+  const selectProfileAvatar = (upload: UploadFile) => {
+    const file = upload.raw
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { useNotification(t('user_profile.invalid_profile'), 'error'); return }
+    if (file.size > 2 * 1024 * 1024) { useNotification(t('user_profile.profile_too_large'), 'error'); return }
+    if (profileAvatarPreview.value?.startsWith('blob:')) URL.revokeObjectURL(profileAvatarPreview.value)
+    profileAvatarFile.value = file
+    profileAvatarPreview.value = URL.createObjectURL(file)
+    removeStoredProfileAvatar.value = false
+  }
+
+  const removeProfileAvatar = () => {
+    if (profileAvatarPreview.value?.startsWith('blob:')) URL.revokeObjectURL(profileAvatarPreview.value)
+    profileAvatarFile.value = null
+    profileAvatarPreview.value = null
+    removeStoredProfileAvatar.value = true
+  }
+
+  const uploadProfileAvatar = async (file: File, userId: string) => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `user-profiles/${userId}/${crypto.randomUUID()}.${extension}`
+    const { error } = await supabase.storage.from(imageBucket).upload(path, file, { contentType: file.type, cacheControl: '3600' })
+    if (error) throw error
+    return path
+  }
+
+  const openProfileDialog = async () => {
+    if (!currentUserId.value) return
+    await loadClientProfile()
+    profileForm.fullName = clientProfile.value?.fullName || ''
+    profileForm.phone = typeof user.value?.user_metadata?.phone === 'string'
+      ? user.value.user_metadata.phone
+      : ''
+    profileAvatarPreview.value = profileAvatarUrl.value || null
+    profileAvatarFile.value = null
+    removeStoredProfileAvatar.value = false
+    profileDialogVisible.value = true
+    await nextTick()
+    profileFormRef.value?.clearValidate()
+  }
 
   const handleAccountCommand = async (command: string) => {
     if (command === 'sign-in') {
@@ -831,14 +967,8 @@
       return
     }
 
-    if (command === 'edit-profile') {
-      profileForm.fullName = typeof user.value?.user_metadata?.full_name === 'string'
-        ? user.value.user_metadata.full_name
-        : ''
-      profileForm.phone = typeof user.value?.user_metadata?.phone === 'string'
-        ? user.value.user_metadata.phone
-        : ''
-      profileDialogVisible.value = true
+    if (command === 'admin-dashboard') {
+      if (clientProfile.value?.role === 'admin') await router.push('/admin')
       return
     }
 
@@ -874,18 +1004,36 @@
     if (!valid || savingProfile.value) return
 
     savingProfile.value = true
+    let uploadedProfilePath: string | null = null
+    let authProfileUpdated = false
+    const oldProfilePath = clientProfile.value?.profile ?? null
     try {
+      const userId = currentUserId.value
+      if (!userId) throw new Error(t('cart.authentication_required'))
+      if (profileAvatarFile.value) uploadedProfilePath = await uploadProfileAvatar(profileAvatarFile.value, userId)
+      const nextProfilePath = uploadedProfilePath ?? (removeStoredProfileAvatar.value ? null : oldProfilePath)
       const { error } = await supabase.auth.updateUser({
         data: {
           ...user.value?.user_metadata,
           full_name: profileForm.fullName.trim(),
           phone: profileForm.phone.trim() || null,
+          profile: nextProfilePath,
         },
       })
       if (error) throw error
+      authProfileUpdated = true
+      const { error: profileError } = await supabase.from('user_profiles').update({
+        full_name: profileForm.fullName.trim(),
+        profile: nextProfilePath,
+        updated_at: new Date().toISOString(),
+      }).eq('user_id', userId)
+      if (profileError) throw profileError
+      if (oldProfilePath && oldProfilePath !== nextProfilePath) await supabase.storage.from(imageBucket).remove([oldProfilePath])
+      await loadClientProfile()
       useNotification(t('client_account.profile_updated'))
       profileDialogVisible.value = false
     } catch (error: unknown) {
+      if (uploadedProfilePath && !authProfileUpdated) await supabase.storage.from(imageBucket).remove([uploadedProfilePath])
       const message = error instanceof Error ? error.message : t('client_account.profile_update_failed')
       useNotification(message, 'error')
     } finally {
@@ -921,7 +1069,8 @@
     searchKeyword.value = typeof value === 'string' ? value : ''
   })
 
-  watch([() => user.value?.id, cartRefresh], () => loadCart(), { immediate: true })
+  watch([currentUserId, cartRefresh], () => loadCart(), { immediate: true })
+  watch(currentUserId, () => loadClientProfile(), { immediate: true })
 
   const submitSearch = () => {
     const keyword = searchKeyword.value.trim()

@@ -123,7 +123,7 @@ interface StockRow {
 interface LowStockProduct { id: number; code: string; nameEn: string; nameKh: string; available: number }
 interface RecentOrder { id: number; code: string; saleDate: string; paymentMethod: string; quantity: number; total: number }
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', middleware: 'auth' })
 useHead({ title: 'Dashboard | Fashion Shop' })
 
 const { t, locale } = useI18n()

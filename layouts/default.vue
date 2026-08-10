@@ -110,18 +110,27 @@
         <el-button text circle>
           <Icon name="solar:bell-outline" size="20" />
         </el-button>
-        <el-dropdown trigger="click">
+        <el-dropdown trigger="click" @command="handleAccountCommand" @visible-change="handleAccountDropdownVisibility">
           <button class="flex items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-slate-100">
-            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-orange-500 border">
-            </span>
+            <el-avatar :key="profileAvatarUrl" :size="36" :src="profileAvatarUrl || undefined" class="border border-slate-200 bg-slate-800 text-xs text-white">
+              {{ profileInitials }}
+            </el-avatar>
             <span class="hidden leading-tight sm:block">
-              <span class="block text-sm font-medium text-slate-900"></span>
+              <span class="block max-w-40 truncate text-sm font-medium text-slate-900">{{ profileName }}</span>
               <span class="block text-xs text-slate-500">{{ user?.email }}</span>
             </span>
             <Icon name="solar:alt-arrow-down-outline" size="16" />
           </button>
           <template #dropdown>
-            <el-dropdown-menu>
+            <el-dropdown-menu class="min-w-56">
+              <div v-loading="profileLoading" element-loading-background="rgba(255, 255, 255, 0.82)" class="flex min-h-[66px] items-center gap-3 border-b border-slate-100 px-4 py-3">
+                <el-avatar :key="profileAvatarUrl" :size="42" :src="profileAvatarUrl || undefined" class="shrink-0 bg-slate-800 text-sm text-white">{{ profileInitials }}</el-avatar>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-800">{{ profileName }}</p>
+                  <p class="truncate text-xs text-slate-500">{{ user?.email }}</p>
+                  <el-tag v-if="adminProfile" class="mt-1" size="small" effect="plain">{{ t(`user_profile.${adminProfile.role}`) }}</el-tag>
+                </div>
+              </div>
               <el-dropdown-item command="edit-profile">
                 <Icon name="mynaui:user" size="17" class="mr-2" />
                 {{ t('headers.edit_profile') }}
@@ -130,7 +139,7 @@
                 <Icon name="solar:lock-password-outline" size="17" class="mr-2" />
                 {{ t('headers.change_password') }}
               </el-dropdown-item>
-              <el-dropdown-item command="logout" @click="logout()">
+              <el-dropdown-item command="logout" divided>
                 <Icon name="solar:logout-broken" size="17" class="mr-2" />
                 {{ t('headers.logout') }}
               </el-dropdown-item>
@@ -297,8 +306,8 @@ const menuItems: MenuItem[] = [
     icon: 'solar:settings-outline',
     children: [
       { 
-        index: '/admin/system/user/', 
-        label: 'user.title', 
+        index: '/admin/system/user-file/', 
+        label: 'user_profile.title', 
         icon: 'solar:user-id-outline',
       }
     ],
@@ -336,11 +345,84 @@ watch(locale, (value) => {
 
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
+const imageBucket = 'fashion-images'
+interface AdminProfile {
+  userId: string
+  fullName: string
+  role: 'customer' | 'admin'
+  profile: string | null
+}
+
+const adminProfile = ref<AdminProfile | null>(null)
+const profileLoading = ref(false)
+let profileRequestId = 0
+const currentUserId = computed(() => {
+  const authUser = user.value as { sub?: string; id?: string } | null
+  return authUser?.sub || authUser?.id || null
+})
+const profileName = computed(() => adminProfile.value?.fullName?.trim() || user.value?.email || t('client_account.account'))
+const profileInitials = computed(() => profileName.value.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || '?')
+const resolveProfileAvatarUrl = (profile: string | null | undefined) => {
+  const value = profile?.trim().replace(/^['"]|['"]$/g, '')
+  if (!value) return ''
+  if (/^(https?:|data:|blob:)/i.test(value)) return value
+
+  const storageMarker = `/storage/v1/object/public/${imageBucket}/`
+  const markerIndex = value.indexOf(storageMarker)
+  const storagePath = markerIndex >= 0
+    ? value.slice(markerIndex + storageMarker.length)
+    : value.startsWith(`${imageBucket}/`)
+      ? value.slice(imageBucket.length + 1)
+      : value.replace(/^\/+/, '')
+  return supabase.storage.from(imageBucket).getPublicUrl(storagePath).data.publicUrl
+}
+const profileAvatarUrl = computed(() => resolveProfileAvatarUrl(adminProfile.value?.profile))
+
+const loadAdminProfile = async () => {
+  const userId = currentUserId.value
+  const requestId = ++profileRequestId
+  if (!userId) {
+    adminProfile.value = null
+    profileLoading.value = false
+    return
+  }
+
+  profileLoading.value = true
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('user_id, full_name, role, profile')
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (error) throw error
+    if (requestId !== profileRequestId || currentUserId.value !== userId) return
+    adminProfile.value = data ? {
+      userId: data.user_id,
+      fullName: data.full_name,
+      role: data.role,
+      profile: data.profile,
+    } as AdminProfile : null
+  } catch {
+    if (requestId === profileRequestId) adminProfile.value = null
+  } finally {
+    if (requestId === profileRequestId) profileLoading.value = false
+  }
+}
+
+const handleAccountDropdownVisibility = (visible: boolean) => {
+  if (visible && currentUserId.value) void loadAdminProfile()
+}
 
 const logout = async () => {
   await supabase.auth.signOut();
   await navigateTo('/auth/login');
 }
+
+const handleAccountCommand = async (command: string) => {
+  if (command === 'logout') await logout()
+}
+
+watch(currentUserId, () => loadAdminProfile(), { immediate: true })
 
 
 </script>

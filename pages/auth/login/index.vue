@@ -51,6 +51,12 @@
             ចូលប្រព័ន្ធ
           </el-button>
         </el-form-item>
+        <p class="mb-5 text-center text-sm text-slate-500">
+          {{ $t('sign_up.no_account') }}
+          <NuxtLink to="/auth/sign-up" class="font-semibold text-slate-900 hover:underline">
+            {{ $t('sign_up.submit') }}
+          </NuxtLink>
+        </p>
       </el-form>
     </div>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <main class="min-h-screen bg-slate-50 px-4 py-8 sm:flex sm:items-center sm:justify-center">
-    <section class="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <section class="mx-auto w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 md:w-[30%]">
       <div class="mb-7 text-center">
         <NuxtLink to="/" class="inline-flex items-center gap-2 text-xl font-bold text-slate-900">
           <Icon :name="t('app.icon')" size="42" />
@@ -32,6 +32,22 @@
         hide-required-asterisk
         @submit.prevent="submit"
       >
+
+       <el-form-item :label="t('user_profile.profile')">
+          <div class="flex w-full items-center gap-4">
+            <el-avatar :size="72" :src="profilePreview || undefined" class="shrink-0 bg-slate-800 text-lg text-white">
+              {{ formInitials }}
+            </el-avatar>
+            <div>
+              <el-upload accept="image/jpeg,image/png,image/webp" :auto-upload="false" :show-file-list="false" :on-change="selectProfile">
+                <el-button>{{ t('user_profile.choose_profile') }}</el-button>
+              </el-upload>
+              <el-button v-if="profileFile" class="!ml-0 !mt-1" type="danger" text @click="removeProfile">{{ t('user_profile.remove_profile') }}</el-button>
+              <p class="mt-1 text-xs text-slate-400">{{ t('user_profile.profile_help') }}</p>
+            </div>
+          </div>
+        </el-form-item>
+
         <el-form-item :label="t('sign_up.full_name')" prop="fullName">
           <el-input v-model="form.fullName" :placeholder="t('sign_up.full_name_placeholder')" clearable autocomplete="name">
             <template #prefix><Icon name="lucide:user" /></template>
@@ -44,8 +60,8 @@
           </el-input>
         </el-form-item>
 
-        <el-form-item :label="t('sign_up.phone')" prop="phone">
-          <el-input v-model="form.phone" type="tel" :placeholder="t('sign_up.phone_placeholder')" clearable autocomplete="tel">
+        <el-form-item :label="t('sign_up.phone')" prop="phoneNumber">
+          <el-input v-model="form.phoneNumber" type="tel" :placeholder="t('sign_up.phone_placeholder')" clearable autocomplete="tel">
             <template #prefix><Icon name="lucide:phone" /></template>
           </el-input>
         </el-form-item>
@@ -85,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 
 definePageMeta({ layout: 'auth' })
 
@@ -95,10 +111,14 @@ const user = useSupabaseUser()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const registrationComplete = ref(false)
+const profileFile = ref<File | null>(null)
+const profilePreview = ref<string | null>(null)
+const imageBucket = 'fashion-images'
+const maxProfileSize = 2 * 1024 * 1024
 const form = reactive({
   fullName: '',
   email: '',
-  phone: '',
+  phoneNumber: '',
   password: '',
   confirmPassword: '',
 })
@@ -112,7 +132,10 @@ const rules = computed<FormRules>(() => ({
     { required: true, message: t('sign_up.email_required'), trigger: 'blur' },
     { type: 'email', message: t('sign_up.email_invalid'), trigger: ['blur', 'change'] },
   ],
-  phone: [{ pattern: /^\+?[0-9\s()-]{8,20}$/, message: t('sign_up.phone_invalid'), trigger: 'blur' }],
+  phoneNumber: [
+    { required: true, message: t('sign_up.phone_required'), trigger: 'blur' },
+    { pattern: /^\+?[0-9\s()-]{8,20}$/, message: t('sign_up.phone_invalid'), trigger: 'blur' },
+  ],
   password: [
     { required: true, message: t('sign_up.password_required'), trigger: 'blur' },
     { min: 8, message: t('sign_up.password_length'), trigger: 'blur' },
@@ -129,11 +152,43 @@ const rules = computed<FormRules>(() => ({
   ],
 }))
 
+const formInitials = computed(() => form.fullName.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || '?')
+const clearProfilePreview = () => {
+  if (profilePreview.value?.startsWith('blob:')) URL.revokeObjectURL(profilePreview.value)
+  profileFile.value = null
+  profilePreview.value = null
+}
+const selectProfile = (upload: UploadFile) => {
+  const file = upload.raw
+  if (!file) return
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    useNotification(t('user_profile.invalid_profile'), 'error')
+    return
+  }
+  if (file.size > maxProfileSize) {
+    useNotification(t('user_profile.profile_too_large'), 'error')
+    return
+  }
+  clearProfilePreview()
+  profileFile.value = file
+  profilePreview.value = URL.createObjectURL(file)
+}
+const removeProfile = () => clearProfilePreview()
+const uploadProfile = async (file: File, userId: string, token: string) => {
+  const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+  const path = `user-profiles/${userId}-${token}.${extensions[file.type] || 'jpg'}`
+  const { error } = await supabase.storage.from(imageBucket).upload(path, file, { contentType: file.type, cacheControl: '3600' })
+  if (error) throw error
+  return path
+}
+
 const submit = async () => {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid || loading.value) return
 
   loading.value = true
+  let uploadedProfilePath: string | null = null
+  const signupProfileToken = profileFile.value ? crypto.randomUUID() : null
   try {
     const { data, error } = await supabase.auth.signUp({
       email: form.email.trim().toLowerCase(),
@@ -141,18 +196,31 @@ const submit = async () => {
       options: {
         data: {
           full_name: form.fullName.trim(),
-          phone: form.phone.trim() || null,
+          phone_number: form.phoneNumber.trim(),
           role: 'customer',
+          profile: null,
+          signup_profile_token: signupProfileToken,
         },
       },
     })
 
     if (error) throw error
+    if (profileFile.value && signupProfileToken && data.user) {
+      uploadedProfilePath = await uploadProfile(profileFile.value, data.user.id, signupProfileToken)
+      const { error: profileError } = await supabase.rpc('complete_signup_profile_avatar', {
+        p_user_id: data.user.id,
+        p_token: signupProfileToken,
+        p_profile: uploadedProfilePath,
+      })
+      if (profileError) throw profileError
+    }
+
     useNotification(t('sign_up.success'))
 
     if (data.session) await navigateTo('/', { replace: true })
     else registrationComplete.value = true
   } catch (error: unknown) {
+    if (uploadedProfilePath) await supabase.storage.from(imageBucket).remove([uploadedProfilePath])
     const message = error instanceof Error ? error.message : t('sign_up.failed')
     useNotification(message, 'error')
   } finally {
@@ -165,6 +233,8 @@ watchEffect(() => {
     navigateTo('/', { replace: true })
   }
 })
+
+onBeforeUnmount(clearProfilePreview)
 
 useSeoMeta({ title: () => `${t('sign_up.title')} | ${t('app.title')}` })
 </script>
