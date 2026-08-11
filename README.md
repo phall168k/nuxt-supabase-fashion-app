@@ -12,7 +12,10 @@ Customers can browse products, filter by category, search the catalog, maintain 
 - Product search and parent/child category filtering
 - Product details, related products, prices, discounts, images, and stock availability
 - Authenticated shopping cart with quantity management
-- Customer registration, login, profile image, profile editing, and password changes
+- Email/password registration and login, plus Google OAuth
+- Password recovery by email with a secure new-password flow
+- Customer profiles with optional avatar, phone number, and address
+- Profile editing and authenticated password changes
 - Purchase-order history with product images
 - Dynamic SEO, Open Graph, Twitter cards, canonical URLs, and Product structured data
 
@@ -123,7 +126,7 @@ Apply them to the linked project:
 npx supabase db push
 ```
 
-The migrations create the application tables, database functions, Row Level Security policies, storage bucket, UUID product relationships, automatic category codes, user profiles, and signup-avatar flow.
+The migrations create the application tables, database functions, Row Level Security policies, storage bucket, UUID product relationships, automatic category codes, user profiles, signup-avatar flow, optional customer contact fields, and Google profile metadata synchronization.
 
 ### Fresh local database
 
@@ -154,9 +157,50 @@ Every Supabase Auth user is mapped to one row in `public.user_profiles`.
 auth.users.id → user_profiles.user_id
 ```
 
-New registrations receive the `customer` role automatically. Only profiles whose role is exactly `admin` can access `/admin` routes. Non-admin users attempting to visit an admin route are redirected to the storefront.
+New email and Google registrations receive the `customer` role automatically. Google display names and profile images are synchronized into `user_profiles`; customer-uploaded profile images are preserved. Only profiles whose role is exactly `admin` can access `/admin` routes. Non-admin users attempting to visit an admin route are redirected to the storefront.
 
 The bootstrap migration promotes the first eligible profile to administrator when setting up a fresh database. Administrator roles can later be managed from the User Profiles page.
+
+### Google authentication
+
+Google authentication requires configuration in both Google Cloud Console and Supabase. No Google client secret should be added to the Nuxt client or committed to this repository.
+
+1. In Google Cloud Console, configure the OAuth consent screen and create an OAuth 2.0 Web application.
+2. Add the Supabase Auth callback as an authorized redirect URI:
+
+   ```text
+   https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
+   ```
+
+   For the local Supabase stack, also use:
+
+   ```text
+   http://127.0.0.1:54321/auth/v1/callback
+   ```
+
+3. In Supabase Dashboard, open **Authentication → Providers → Google**, enable Google, and enter the Google client ID and client secret.
+4. Under **Authentication → URL Configuration**, set the production Site URL and allow the application redirects:
+
+   ```text
+   http://localhost:3000/auth/callback
+   http://localhost:3000/auth/reset-password
+   https://YOUR_DOMAIN/auth/callback
+   https://YOUR_DOMAIN/auth/reset-password
+   ```
+
+The application sends both login and registration through `/auth/callback`, exchanges the OAuth authorization code for a Supabase session, and redirects the customer to the storefront.
+
+### Password recovery
+
+The **Forgot password** action on the login page calls Supabase password recovery and sends the customer back to `/auth/reset-password`. The reset page validates the recovery session before accepting a new password.
+
+For production email delivery, configure a custom SMTP provider in **Supabase Dashboard → Authentication → Email**. Supabase's default email service is intended for testing and is rate-limited. Keep `/auth/reset-password` in the Supabase redirect allow list for every deployed domain.
+
+When running Supabase locally, recovery emails are captured by Inbucket and can be opened at:
+
+```text
+http://127.0.0.1:54324
+```
 
 ## Payment flow
 
@@ -186,10 +230,21 @@ npm run preview
 
 Nuxt DevTools are enabled only when `NODE_ENV=development`.
 
+Before deploying:
+
+1. Set `NUXT_PUBLIC_URL` to the public HTTPS origin.
+2. Set the production Supabase URL and anon key.
+3. Apply pending migrations with `npx supabase db push`.
+4. Configure the production Site URL and auth redirect URLs in Supabase.
+5. Enable Google with production OAuth credentials.
+6. Configure production SMTP for signup and password-recovery emails.
+7. Build and test email login, Google login, password recovery, profile creation, and `/admin` authorization in a staging environment.
+
 ## Important notes
 
 - Product IDs use UUIDs throughout the product and related inventory/sales tables.
-- Product images and user avatars are stored in the public `fashion-images` bucket.
+- Product images and uploaded user avatars are stored in the public `fashion-images` bucket. Google avatars remain HTTPS URLs supplied by Google.
+- Customer `phone_number` and `address` fields are optional and protected by the profile Row Level Security policies.
 - Database authorization is enforced with Supabase Row Level Security and security-definer functions.
 - Client-side admin menu visibility is only a UI convenience; the auth middleware and database policies provide the actual access control.
 - Test KHQR payments and database migrations in a non-production environment before deployment.
