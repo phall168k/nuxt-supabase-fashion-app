@@ -132,7 +132,7 @@
 import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-PAYMENT-METHOD' })
+useHead({ title: 'Payment Method | Fashion Store' })
 
 interface PaymentMethod {
   id: number; name: string; logoPath: string | null; logoUrl: string | null

@@ -176,7 +176,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'MINI-POS-CATEGORY'
+  title: 'Category | Fashion Store'
 })
 
 interface Category {

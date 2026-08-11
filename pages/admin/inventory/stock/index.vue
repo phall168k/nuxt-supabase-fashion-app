@@ -156,7 +156,7 @@
 import type { FormInstance, FormRules } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-STOCK' })
+useHead({ title: 'Sock | Fashion Store' })
 
 interface StockProduct {
   id: string

@@ -150,7 +150,7 @@
 import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-BANNER' })
+useHead({ title: 'Banner | Fashion Store' })
 
 interface ProductOption { id: string; code: string; nameEn: string; nameKh: string }
 interface Banner {

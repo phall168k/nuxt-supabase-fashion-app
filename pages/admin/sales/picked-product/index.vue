@@ -83,7 +83,7 @@
 import type { FormInstance, FormRules } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-PICKED-PRODUCT' })
+useHead({ title: 'Picked Products | Fashion Store' })
 
 interface ProductOption { id: string; code: string; nameEn: string; nameKh: string; available: number; thumbnailUrl: string | null }
 interface PickedItem { id: number; productId: string; quantity: number; pickedById: string; createdAt: string; product: ProductOption }

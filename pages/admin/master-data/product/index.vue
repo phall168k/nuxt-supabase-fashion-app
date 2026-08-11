@@ -238,7 +238,7 @@
 import type { FormInstance, FormRules, UploadFile } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-PRODUCT' })
+useHead({ title: 'Product | Fashion Store' })
 
 interface CategoryOption {
   id: number

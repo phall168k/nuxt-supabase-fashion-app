@@ -230,7 +230,7 @@
 import type { FormInstance, FormRules } from 'element-plus'
 
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'MINI-POS-SALE' })
+useHead({ title: 'Sale | Fashion Store' })
 
 type SaleStatus = 'draft' | 'completed'
 
