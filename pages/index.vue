@@ -208,7 +208,9 @@ const { data: bannerRows } = await useAsyncData('client-banners', async () => {
     .eq('is_active', true)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  // Banners are optional storefront content. A temporary API failure should
+  // not turn the entire homepage SSR response into a Nuxt 500 page.
+  if (error) return []
   return (data ?? []) as unknown as BannerRow[]
 }, { default: () => [] })
 
@@ -278,12 +280,18 @@ const loadMoreProducts = async () => {
   }
 }
 
-await loadMoreProducts()
+// These refs are local component state rather than useAsyncData payload state.
+// Loading them during SSR renders markup the client cannot hydrate from its
+// initial empty refs, so start the paginated list after hydration instead.
+onMounted(loadMoreProducts)
 
 const config = useRuntimeConfig();
 
 const route = useRoute()
-const siteUrl = config.public.nuxtPublicUrl;
+const configuredSiteUrl = String(config.public.nuxtPublicUrl || '').trim()
+const siteUrl = /^https?:\/\//i.test(configuredSiteUrl)
+  ? configuredSiteUrl.replace(/\/$/, '')
+  : requestUrl.origin
 
 const title = 'Fashion Store | Trendy Clothing, Shoes & Accessories Online'
 const description =

@@ -1144,7 +1144,9 @@
       .eq('is_active', true)
       .order('name_en')
 
-    if (error) throw error
+    // Navigation categories are optional. Keep public pages renderable when
+    // Supabase is temporarily unavailable instead of failing SSR with 500.
+    if (error) return []
     return (data ?? []) as CategoryRow[]
   }, { default: () => [] })
 
