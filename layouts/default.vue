@@ -17,7 +17,7 @@
           :collapse="collapseStore.isCollapsed"
           :default-active="activeMenu"
           unique-opened
-          class="!border-0 px-2 py-3"
+          class="admin-menu !border-0 px-2 py-3"
           router
         >
           <template
@@ -428,6 +428,15 @@ watch(currentUserId, () => loadAdminProfile(), { immediate: true })
 </script>
 
 <style scoped>
+.admin-menu {
+  --el-menu-active-color: var(--el-color-danger);
+}
+
+:deep(.admin-menu .el-menu-item.is-active),
+:deep(.admin-menu .el-sub-menu.is-active > .el-sub-menu__title) {
+  color: var(--el-color-danger);
+}
+
 .language-switcher {
   --el-segmented-bg-color: #f8fafc;
   --el-segmented-item-hover-bg-color: #eef2f7;
