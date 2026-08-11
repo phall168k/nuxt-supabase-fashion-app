@@ -1,11 +1,12 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     const supabase = useSupabaseClient();
-    const isLoginPage = to.path === '/auth/login';
+    const isGuestAuthPage = to.path === '/auth/login' || to.path === '/auth/sign-up';
     const isAdminRoute = to.path === '/admin' || to.path.startsWith('/admin/');
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    if (isLoginPage) {
+    // Login and customer registration must remain accessible to guests.
+    if (isGuestAuthPage) {
         if (user) {
             return navigateTo('/', { replace: true });
         }

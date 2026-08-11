@@ -29,6 +29,14 @@
         "email_placeholder": "you{'@'}example.com",
         "phone": "លេខទូរស័ព្ទ",
         "phone_placeholder": "+855 12 345 678",
+        "profile_image": "រូបភាពប្រវត្តិរូប (មិនចាំបាច់)",
+        "profile_prompt": "បន្ថែមរូបថតប្រវត្តិរូប",
+        "choose_profile": "ជ្រើសរើសរូបភាព",
+        "change_profile": "ប្ដូររូបភាព",
+        "remove_profile": "លុបចេញ",
+        "profile_help": "រូបភាព JPG, PNG ឬ WebP ទំហំមិនលើស ៥ MB។",
+        "profile_invalid": "សូមជ្រើសរើសរូបភាព JPG, PNG ឬ WebP",
+        "profile_too_large": "រូបភាពប្រវត្តិរូបត្រូវមានទំហំ ៥ MB ឬតូចជាងនេះ",
         "password": "ពាក្យសម្ងាត់",
         "password_placeholder": "យ៉ាងតិច ៨ តួអក្សរ",
         "confirm_password": "បញ្ជាក់ពាក្យសម្ងាត់",
@@ -52,7 +60,18 @@
         "failed": "មិនអាចបង្កើតគណនីបានទេ",
         "check_email_title": "សូមពិនិត្យអ៊ីមែលរបស់អ្នក",
         "check_email_description": "យើងបានផ្ញើតំណបញ្ជាក់ទៅ {email}។",
-        "go_to_login": "ទៅកាន់ការចូលគណនី"
+        "go_to_login": "ទៅកាន់ការចូលគណនី",
+        "or": "ឬក៏",
+        "welcome_back": "សូមស្វាគមន៍ត្រឡប់មកវិញ!",
+        "sign_in_to_enjoy_a_seamless_shopping_experience": "ចូលប្រើគណនីរបស់អ្នក ដើម្បីទទួលបានបទពិសោធន៍នៃការទិញទំនិញដ៏រលូន។",
+        "continue_with_google": "ចុះឈ្មោះជាមួយ Google",
+        "forgot_password": "ភ្លេចពាក្យសម្ងាត់?",
+        "create_an_account": "បង្កើតគណនី",
+        "get_ten_percentage_off_your_first_fashion_store_purchase": "ទទួលបានការបញ្ចុះតម្លៃ ១០% សម្រាប់ការទិញទំនិញលើកដំបូងរបស់អ្នកនៅហាង Fashion Store។"
+        ,"member_experience": "បទពិសោធន៍សមាជិក"
+        ,"save_favorites": "រក្សាទុកម៉ូដដែលអ្នកចូលចិត្ត"
+        ,"track_orders": "តាមដានការបញ្ជាទិញនៅកន្លែងតែមួយ"
+        ,"member_offers": "ទទួលបានការផ្តល់ជូនសម្រាប់សមាជិក"
     },
     "client_account": {
         "account": "គណនីរបស់ខ្ញុំ",
@@ -68,6 +87,25 @@
         "password_update_failed": "មិនអាចផ្លាស់ប្ដូរពាក្យសម្ងាត់បានទេ",
         "signed_out": "បានចាកចេញពីគណនីដោយជោគជ័យ",
         "sign_out_failed": "មិនអាចចាកចេញពីគណនីបានទេ"
+    },
+    "auth": {
+        "cancel": "បោះបង់",
+        "google_failed": "មិនអាចបន្តជាមួយ Google បានទេ",
+        "oauth_finishing": "កំពុងបញ្ចប់ការចូលគណនី...",
+        "oauth_failed": "មិនអាចបញ្ចប់ការចូលគណនីបានទេ",
+        "forgot_password_title": "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
+        "forgot_password_description": "បញ្ចូលអាសយដ្ឋានអ៊ីមែលរបស់អ្នក ហើយយើងនឹងផ្ញើតំណសុវត្ថិភាពសម្រាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញ។",
+        "send_reset_link": "ផ្ញើតំណកំណត់ឡើងវិញ",
+        "reset_email_sent": "បានផ្ញើតំណកំណត់ពាក្យសម្ងាត់ឡើងវិញ។ សូមពិនិត្យអ៊ីមែលរបស់អ្នក។",
+        "reset_email_failed": "មិនអាចផ្ញើអ៊ីមែលកំណត់ឡើងវិញបានទេ",
+        "new_password_title": "បង្កើតពាក្យសម្ងាត់ថ្មី",
+        "new_password_description": "ជ្រើសរើសពាក្យសម្ងាត់រឹងមាំដែលអ្នកមិនធ្លាប់ប្រើពីមុន។",
+        "new_password": "ពាក្យសម្ងាត់ថ្មី",
+        "confirm_new_password": "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី",
+        "update_password": "កែប្រែពាក្យសម្ងាត់",
+        "password_updated": "ពាក្យសម្ងាត់របស់អ្នកត្រូវបានកែប្រែ",
+        "invalid_reset_link": "តំណកំណត់ពាក្យសម្ងាត់នេះមិនត្រឹមត្រូវ ឬផុតកំណត់",
+        "back_to_login": "ត្រឡប់ទៅចូលគណនី"
     },
     "dashboard": {
         "title": "ផ្ទាំងគ្រប់គ្រង",

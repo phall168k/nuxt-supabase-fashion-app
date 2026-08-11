@@ -1,5 +1,4 @@
 <template>
-  <NuxtLoadingIndicator color="#1F2638"/>
   <div class="min-h-screen bg-slate-100 text-slate-800">
     <aside
       class="fixed inset-y-0 left-0 z-40 flex h-screen flex-col overflow-hidden border-r border-slate-200 bg-white transition-all duration-200"

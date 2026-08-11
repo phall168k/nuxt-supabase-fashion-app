@@ -29,6 +29,14 @@
         "email_placeholder": "you{'@'}example.com",
         "phone": "Phone number",
         "phone_placeholder": "+855 12 345 678",
+        "profile_image": "Profile image (optional)",
+        "profile_prompt": "Add a profile photo",
+        "choose_profile": "Choose image",
+        "change_profile": "Change image",
+        "remove_profile": "Remove",
+        "profile_help": "JPG, PNG or WebP, up to 5 MB.",
+        "profile_invalid": "Choose a JPG, PNG or WebP image",
+        "profile_too_large": "Profile image must be 5 MB or smaller",
         "password": "Password",
         "password_placeholder": "At least 8 characters",
         "confirm_password": "Confirm password",
@@ -52,7 +60,18 @@
         "failed": "Unable to create your account",
         "check_email_title": "Check your email",
         "check_email_description": "We sent a confirmation link to {email}.",
-        "go_to_login": "Go to sign in"
+        "go_to_login": "Go to sign in",
+        "or": "OR",
+        "welcome_back": "Welcome back!",
+        "sign_in_to_enjoy_a_seamless_shopping_experience": "Sign in to enjoy a seamless shopping experience.",
+        "continue_with_google": "Continue with Google",
+        "forgot_password": "Forgot password?",
+        "create_an_account": "Create an account",
+        "get_ten_percentage_off_your_first_fashion_store_purchase": "Get 10% off your first Fashion Store purchase."
+        ,"member_experience": "The member experience"
+        ,"save_favorites": "Save your favorite pieces"
+        ,"track_orders": "Track every order in one place"
+        ,"member_offers": "Access member-only offers"
     },
     "client_account": {
         "account": "My account",
@@ -68,6 +87,25 @@
         "password_update_failed": "Unable to update password",
         "signed_out": "Signed out successfully",
         "sign_out_failed": "Unable to sign out"
+    },
+    "auth": {
+        "cancel": "Cancel",
+        "google_failed": "Unable to continue with Google",
+        "oauth_finishing": "Finishing your sign in...",
+        "oauth_failed": "Unable to complete sign in",
+        "forgot_password_title": "Reset your password",
+        "forgot_password_description": "Enter your email address and we'll send you a secure password reset link.",
+        "send_reset_link": "Send reset link",
+        "reset_email_sent": "Password reset link sent. Check your email.",
+        "reset_email_failed": "Unable to send the reset email",
+        "new_password_title": "Create a new password",
+        "new_password_description": "Choose a strong password you haven't used before.",
+        "new_password": "New password",
+        "confirm_new_password": "Confirm new password",
+        "update_password": "Update password",
+        "password_updated": "Your password has been updated",
+        "invalid_reset_link": "This password reset link is invalid or has expired",
+        "back_to_login": "Back to sign in"
     },
     "dashboard": {
         "title": "Dashboard",
