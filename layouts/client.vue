@@ -1,14 +1,23 @@
 <template>
   <section class="flex min-h-screen flex-col pt-[80px]">
     <nav class="fixed inset-x-0 top-0 z-50 flex h-[80px] w-full flex-col items-center justify-center border-b bg-white/95 shadow-sm backdrop-blur">
-      <nav class="h-[50px] w-[90%] flex items-center justify-center pt-2">
-        <div class="w-[30%]">
-          <NuxtLink class="text-[20px] font-bold text-slate-900" to="/">{{ $t('app.title') }}</NuxtLink>
+      <nav class="h-[50px] w-[90%] flex items-center justify-between pt-2">
+        <div class="w-[50%] flex items-center gap-2">
+          <button
+            type="button"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 md:hidden"
+            aria-label="Open categories"
+            @click="categoryDrawerVisible = true"
+          >
+            <Icon size="25" name="lucide:menu" />
+          </button>
+          <NuxtLink class="text-[20px] font-bold text-slate-900 flex items-center gap-2" to="/">
+            <el-image class="h-8" src="/logo.png" fit="cover"/>
+            <span class="hidden md:flex">{{ $t('app.title') }}</span>
+          </NuxtLink>
         </div>
-        <div class="w-[40%] flex items-center justify-center">
-          <!-- <el-image class="h-5" src="https://myten11.com/images/logos/logo1.png" fit="cover"/> -->
-        </div>
-        <div class="w-[30%] h-full flex items-center justify-end gap-3">
+        <div class="w-[50%] h-full flex items-center justify-end gap-3">
+          
           <Icon  
             @click="handleChangeLocalizaiton(locale === 'en' ? 'km' : 'en')"
             :size="25" 
@@ -19,6 +28,7 @@
             v-model="searchKeyword"
             :placeholder="t('search.placeholder')"
             clearable
+            class="!hidden md:!flex"
             @keydown.enter="submitSearch"
             @clear="submitSearch"
           >
@@ -26,6 +36,14 @@
               <Icon name="iconamoon:search-bold"/>
             </template>
           </el-input>
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 md:hidden"
+            :aria-label="t('search.placeholder')"
+            @click="searchDialogVisible = true"
+          >
+              <Icon size="25" name="iconamoon:search-bold" />
+          </button>
           <el-dropdown trigger="click" placement="bottom-end" @command="handleAccountCommand" @visible-change="handleAccountDropdownVisibility">
             <button
               type="button"
@@ -45,7 +63,9 @@
                     <p class="truncate text-sm font-semibold text-slate-800">{{ customerName }}</p>
                     <p class="mt-0.5 truncate text-xs text-slate-500">{{ user.email }}</p>
                     <el-tag v-if="clientProfile" class="mt-1.5" size="small" effect="plain">{{ t(`user_profile.${clientProfile.role}`) }}</el-tag>
-                  </div>
+                  </div><button type="button" class="flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100" :aria-label="t('cart.title')" @click="openCart">
+              <Icon size="25" name="iconamoon:shopping-bag-light" />
+            </button>
                 </div>
                 <el-dropdown-item v-if="clientProfile?.role === 'admin'" command="admin-dashboard">
                   <Icon name="lucide:layout-dashboard" class="mr-2" />
@@ -82,7 +102,7 @@
         </div>
       </nav>
       <nav
-        class="h-[30px] w-[90%] flex items-center justify-start gap-8 pb-2"
+        class="h-[30px] w-[90%] hidden md:flex items-center justify-start gap-8 pb-2"
         aria-label="Product categories"
         @mouseleave="closeDropdown"
       >
@@ -150,6 +170,114 @@
         </div>
       </nav>
     </nav>
+
+    <el-dialog
+      v-model="searchDialogVisible"
+      width="min(92vw, 520px)"
+      :show-close="false"
+      align-center
+      append-to-body
+      class="mobile-search-dialog"
+    >
+      <div class="flex items-center gap-2">
+        <el-input
+          v-model="searchKeyword"
+          :placeholder="t('search.placeholder')"
+          size="large"
+          clearable
+          autofocus
+          @keyup.enter="submitMobileSearch"
+        >
+          <template #prefix>
+            <Icon name="iconamoon:search-bold" />
+          </template>
+        </el-input>
+        <button
+          type="button"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+          aria-label="Close search"
+          @click="searchDialogVisible = false"
+        >
+          <Icon name="lucide:x" size="22" />
+        </button>
+      </div>
+    </el-dialog>
+
+    <el-drawer
+      v-model="categoryDrawerVisible"
+      direction="ltr"
+      size="min(88vw, 360px)"
+      :show-close="false"
+      append-to-body
+      class="mobile-category-drawer"
+    >
+      <template #header>
+        <div class="flex w-full items-center justify-between">
+          <div class="flex items-center gap-2">
+            <el-image class="h-8 w-8" src="/logo.png" fit="cover" />
+            <span class="text-lg font-bold text-slate-900">Categories</span>
+          </div>
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100"
+            aria-label="Close categories"
+            @click="categoryDrawerVisible = false"
+          >
+            <Icon name="lucide:x" size="22" />
+          </button>
+        </div>
+      </template>
+
+      <nav aria-label="Product categories" class="space-y-2">
+        <section v-for="category in categories" :key="category.id" class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div class="flex min-h-12 items-center gap-3 px-4 py-3">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+              <Icon :name="category.icon || defaultCategoryIcon" size="20" />
+            </span>
+            <NuxtLink
+              :to="categoryPath(category)"
+              class="min-w-0 flex-1 truncate font-semibold text-slate-800 transition hover:text-slate-950"
+              @click="categoryDrawerVisible = false"
+            >
+              {{ categoryName(category) }}
+            </NuxtLink>
+            <button
+              v-if="category.children.length"
+              type="button"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              :aria-label="`Toggle ${categoryName(category)} subcategories`"
+              :aria-expanded="expandedMobileCategoryIds.includes(category.id)"
+              @click="toggleMobileCategory(category.id)"
+            >
+              <Icon
+                name="lucide:chevron-down"
+                size="18"
+                class="transition-transform duration-200"
+                :class="{ 'rotate-180': expandedMobileCategoryIds.includes(category.id) }"
+              />
+            </button>
+            <Icon v-else name="lucide:chevron-right" size="17" class="text-slate-400" />
+          </div>
+
+          <Transition name="mobile-category-collapse">
+          <div v-if="category.children.length && expandedMobileCategoryIds.includes(category.id)" class="border-t border-slate-100 bg-slate-50/70 px-3 py-2">
+            <NuxtLink
+              v-for="child in category.children"
+              :key="child.id"
+              :to="categoryPath(child)"
+              class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-600 transition hover:bg-white hover:text-slate-950"
+              @click="categoryDrawerVisible = false"
+            >
+              <Icon :name="child.icon || defaultCategoryIcon" size="17" class="shrink-0 text-slate-400" />
+              <span class="truncate">{{ categoryName(child) }}</span>
+            </NuxtLink>
+          </div>
+          </Transition>
+        </section>
+
+        <p v-if="!categories.length" class="py-10 text-center text-sm text-slate-400">No categories available</p>
+      </nav>
+    </el-drawer>
 
     <el-drawer v-model="cartDrawerVisible" :title="t('cart.title')" direction="rtl" size="min(92vw, 430px)" append-to-body @open="loadCart">
       <div v-loading="cartLoading" class="min-h-40">
@@ -498,11 +626,14 @@
   const router = useRouter()
   const currentYear = new Date().getFullYear()
   const searchKeyword = ref(typeof route.query.q === 'string' ? route.query.q : '')
+  const searchDialogVisible = ref(false)
   const handleChangeLocalizaiton = (e: any) => {
     setLocale(e);
   }
 
   const activeCategoryId = ref<number | null>(null)
+  const categoryDrawerVisible = ref(false)
+  const expandedMobileCategoryIds = ref<number[]>([])
   const defaultCategoryIcon = 'solar:tag-outline'
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
@@ -1144,6 +1275,12 @@
     router.push({ path: '/search', query: keyword ? { q: keyword } : {} })
   }
 
+  const submitMobileSearch = async () => {
+    searchDialogVisible.value = false
+    await nextTick()
+    submitSearch()
+  }
+
   const { data: categoryRows } = await useAsyncData('client-categories', async () => {
     const { data, error } = await supabase
       .from('categories')
@@ -1192,6 +1329,12 @@
       ? null
       : categoryId;
   };
+
+  const toggleMobileCategory = (categoryId: number) => {
+    expandedMobileCategoryIds.value = expandedMobileCategoryIds.value.includes(categoryId)
+      ? expandedMobileCategoryIds.value.filter(id => id !== categoryId)
+      : [categoryId]
+  }
 </script>
 
 <style scoped>
@@ -1245,6 +1388,18 @@
   .category-menu-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+  }
+
+  .mobile-category-collapse-enter-active,
+  .mobile-category-collapse-leave-active {
+    transition: opacity 180ms ease, transform 180ms ease;
+    transform-origin: top;
+  }
+
+  .mobile-category-collapse-enter-from,
+  .mobile-category-collapse-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 
   .footer-link {
