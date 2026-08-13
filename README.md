@@ -184,8 +184,8 @@ Google authentication requires configuration in both Google Cloud Console and Su
    ```text
    http://localhost:3000/auth/callback
    http://localhost:3000/auth/reset-password
-   https://YOUR_DOMAIN/auth/callback
-   https://YOUR_DOMAIN/auth/reset-password
+   https://nuxt-supabase-fashion-app.vercel.app/auth/callback
+   https://nuxt-supabase-fashion-app.vercel.app/auth/reset-password
    ```
 
 The application sends both login and registration through `/auth/callback`, exchanges the OAuth authorization code for a Supabase session, and redirects the customer to the storefront.
