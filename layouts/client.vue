@@ -28,7 +28,7 @@
             v-model="searchKeyword"
             :placeholder="t('search.placeholder')"
             clearable
-            class="!hidden md:!flex"
+            class="!hidden md:!flex !w-[50%]"
             @keydown.enter="submitSearch"
             @clear="submitSearch"
           >
