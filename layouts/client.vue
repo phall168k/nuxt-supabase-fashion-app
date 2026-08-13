@@ -55,7 +55,7 @@
                   <Icon name="lucide:user-pen" class="mr-2" />
                   {{ t('headers.edit_profile') }}
                 </el-dropdown-item>
-                <el-dropdown-item v-if="user" command="change-password">
+                <el-dropdown-item v-if="user && !isGoogleUser" command="change-password">
                   <Icon name="lucide:key-round" class="mr-2" />
                   {{ t('headers.change_password') }}
                 </el-dropdown-item>
@@ -506,6 +506,13 @@
   const defaultCategoryIcon = 'solar:tag-outline'
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
+  const isGoogleUser = computed(() => {
+    const provider = user.value?.app_metadata?.provider
+    const providers = user.value?.app_metadata?.providers
+
+    return provider === 'google'
+      || (Array.isArray(providers) && providers.includes('google'))
+  })
   const cartRefresh = useCartRefresh()
   const cartDrawerVisible = ref(false)
   const cartLoading = ref(false)
